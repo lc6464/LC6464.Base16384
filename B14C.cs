@@ -64,6 +64,7 @@ public static partial class Base16384 {
 			case 4:
 			case 5: outLength += 8; break;
 			case 6: outLength += 10; break;
+			default: break; // outLength += 0;
 		}
 		var values = (ulong*)bufferPtr;
 		ulong n = 0;
@@ -134,6 +135,7 @@ public static partial class Base16384 {
 				case 4:
 				case 5: outLength -= 8; break;
 				case 6: outLength -= 10; break;
+				default: break; // outLength += 0;
 			}
 		}
 		outLength = (outLength / 8 * 7) + offset;
