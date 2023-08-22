@@ -20,7 +20,6 @@ public static partial class Base16384 {
 			case 4:
 			case 5: outLength += 8; break;
 			case 6: outLength += 10; break;
-			default: break;
 		}
 		return outLength + 8 + 16;  // 冗余的8B用于可能的结尾的覆盖，再加上16B备用
 	}
@@ -41,7 +40,6 @@ public static partial class Base16384 {
 			case 4:
 			case 5: outLength -= 8; break;
 			case 6: outLength -= 10; break;
-			default: break;
 		}
 		return outLength / 8 * 7 + offset + 1 + 16; // 多出1字节用于循环覆盖，再加上16B备用
 	}
