@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Description>Base16384 编解码器的 .NET 实现。</Description>
+		<Copyright>Copyright © 2023 LC. All rights reserved.</Copyright>
+		<PackageProjectUrl>https://github.com/lc6464/LC6464.Base16384</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/lc6464/LC6464.Base16384</RepositoryUrl>
+		<PackageTags>Base16384;Base64;utf16;utf16be;binary;unsafe-pointer</PackageTags>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<Authors>LC</Authors>
+		<Version>1.0.0.0</Version>
+		<PackageReleaseNotes>初步实现</PackageReleaseNotes>
+	</PropertyGroup>
+	<ItemGroup>
+		<Using Include="System.Runtime.InteropServices" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Update="README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+</Project>
