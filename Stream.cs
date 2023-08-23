@@ -83,7 +83,7 @@ public static partial class Base16384 {
 		if (stream.Length > Buffer0Length) {
 			var buffer0 = new byte[Buffer0Length];
 
-			int readCount, writeCount = 0;
+			int readCount, writeCount = 0; // skipcq: CS-W1022 赋值的确是不必要的
 			while ((readCount = stream.Read(buffer0, 0, Buffer0Length)) > 0) {
 				var encodedData = Encode(buffer0, readCount);
 				output.Write(encodedData);
@@ -92,7 +92,8 @@ public static partial class Base16384 {
 			output.Flush();
 
 			return writeCount;
-		} else {
+		}
+		{
 			Span<byte> data = new(new byte[stream.Length]);
 			_ = stream.Read(data);
 			var encodedData = Encode(data.ToArray());
@@ -112,8 +113,8 @@ public static partial class Base16384 {
 		if (stream.Length > Buffer1Length) {
 			var buffer1 = new byte[Buffer1Length];
 
-			byte end;
-			int readCount, writeCount = 0;
+			byte end; // skipcq: CS-W1022 赋值的确是不必要的
+			int readCount, writeCount = 0; // skipcq: CS-W1022 赋值的确是不必要的
 			while ((readCount = stream.Read(buffer1, 0, Buffer1Length)) > 0) {
 				if (Convert.ToBoolean(end = IsNextEnd(stream))) {
 					buffer1[readCount++] = (byte)'=';
@@ -124,9 +125,10 @@ public static partial class Base16384 {
 				writeCount += decodedData.Length;
 			}
 			output.Flush();
-			
+
 			return writeCount;
-		} else {
+		}
+		{
 			Span<byte> data = new(new byte[stream.Length]);
 			_ = stream.Read(data);
 			var decodedData = Decode(data.ToArray());
