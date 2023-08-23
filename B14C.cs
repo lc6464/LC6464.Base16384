@@ -1,32 +1,18 @@
-﻿namespace LC6464.Base16384;
+﻿using System.Buffers.Binary;
+
+namespace LC6464.Base16384;
 
 /// <summary>
 /// Base16384 编解码器。
 /// </summary>
 public static partial class Base16384 {
 	/// <summary>
-	/// 反转字节序。
-	/// </summary>
-	/// <param name="value">待反转的值</param>
-	/// <returns>反转结果</returns>
-	public static ulong ReverseEndian(ulong value) =>
-		BitConverter.ToUInt64(BitConverter.GetBytes(value).Reverse().ToArray());
-
-	/// <summary>
-	/// 反转字节序。
-	/// </summary>
-	/// <param name="value">待反转的值</param>
-	/// <returns>反转结果</returns>
-	public static ushort ReverseEndian(ushort value) =>
-		BitConverter.ToUInt16(BitConverter.GetBytes(value).Reverse().ToArray());
-
-	/// <summary>
 	/// 将主机字节序转换为大端字节序。
 	/// </summary>
 	/// <param name="value">主机字节序值</param>
 	/// <returns>若主机字节序为大端字节序，则直接返回输入的值；否则返回反转后的结果。</returns>
 	public static ulong HostToBigEndian(ulong value) =>
-		BitConverter.IsLittleEndian ? ReverseEndian(value) : value;
+		BitConverter.IsLittleEndian ? BinaryPrimitives.ReverseEndianness(value) : value;
 
 	/// <summary>
 	/// 将主机字节序转换为大端字节序。
@@ -34,7 +20,7 @@ public static partial class Base16384 {
 	/// <param name="value">主机字节序值</param>
 	/// <returns>若主机字节序为大端字节序，则直接返回输入的值；否则返回反转后的结果。</returns>
 	public static ushort HostToBigEndian(ushort value) =>
-		BitConverter.IsLittleEndian ? ReverseEndian(value) : value;
+		BitConverter.IsLittleEndian ? BinaryPrimitives.ReverseEndianness(value) : value;
 
 	/// <summary>
 	/// 将大端字节序转换为主机字节序。
@@ -42,7 +28,7 @@ public static partial class Base16384 {
 	/// <param name="value">大端字节序值</param>
 	/// <returns>若主机字节序为大端字节序，则直接返回输入的值；否则返回反转后的结果。</returns>
 	public static ulong BigEndianToHost(ulong value) =>
-		BitConverter.IsLittleEndian ? ReverseEndian(value) : value;
+		BitConverter.IsLittleEndian ? BinaryPrimitives.ReverseEndianness(value) : value;
 
 
 	/// <summary>
@@ -107,7 +93,7 @@ public static partial class Base16384 {
 				}
 			}
 			sum += 0x004e004e004e004e;
-			values[n] = BitConverter.IsLittleEndian ? sum : ReverseEndian(sum);
+			values[n] = BitConverter.IsLittleEndian ? sum : BinaryPrimitives.ReverseEndianness(sum);
 			bufferPtr[outLength - 2] = (byte)'=';
 			bufferPtr[outLength - 1] = (byte)offset;
 		}
@@ -157,7 +143,7 @@ public static partial class Base16384 {
 		}
 		if (Convert.ToBoolean(offset--)) {
 			// 这里有读取越界
-			var sum = (BitConverter.IsLittleEndian ? values[n] : ReverseEndian(values[n])) - 0x000000000000004e;
+			var sum = (BitConverter.IsLittleEndian ? values[n] : BinaryPrimitives.ReverseEndianness(values[n])) - 0x000000000000004e;
 			bufferPtr[i++] = (byte)(((sum & 0x000000000000003f) << 2) | ((sum & 0x000000000000c000) >> 14));
 			if (Convert.ToBoolean(offset--)) {
 				sum -= 0x00000000004e0000;

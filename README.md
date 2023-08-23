@@ -16,12 +16,11 @@ Base16384 编解码器的 .NET 实现。
 		<TargetFramework>net7.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<!-- 一些东西 -->
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="LC6464.Base16384" Version="1.0.0" />
-		<!-- PackageReference，请使用 Visual Studio 或 dotnet cli 等工具添加 -->
+		<!-- PackageReference，建议使用 Visual Studio 或 dotnet cli 等工具添加 -->
 	</ItemGroup>
 	<ItemGroup>
 		<Using Include="LC6464.Base16384" />

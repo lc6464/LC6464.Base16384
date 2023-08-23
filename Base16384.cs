@@ -43,7 +43,7 @@ public static partial class Base16384 {
 			case 6: outLength -= 10; break;
 			default: break; // outLength += 0;
 		}
-		return outLength / 8 * 7 + offset + 1 + 16; // 多出1字节用于循环覆盖，再加上16B备用
+		return (outLength / 8 * 7) + offset + 1 + 16; // 多出1字节用于循环覆盖，再加上16B备用
 	}
 
 
@@ -51,11 +51,11 @@ public static partial class Base16384 {
 	/// 编码二进制数据到 Base16384 UTF-16 BE 编码数据。
 	/// </summary>
 	/// <param name="data">二进制数据</param>
+	/// <param name="dataLength">二进制数据有效长度</param>
 	/// <param name="bufferPtr">输出缓冲区指针</param>
 	/// <param name="bufferLength">输出缓冲区长度</param>
 	/// <returns>已写入输出缓冲区的内容的长度</returns>
-	public static unsafe int Encode(byte[] data, byte* bufferPtr, int bufferLength) {
-		var dataLength = data.Length;
+	public static unsafe int Encode(byte[] data, int dataLength, byte* bufferPtr, int bufferLength) {
 		var dataPtr = (byte*)Marshal.AllocHGlobal(dataLength);
 		Marshal.Copy(data, 0, (IntPtr)dataPtr, dataLength);
 
@@ -69,11 +69,11 @@ public static partial class Base16384 {
 	/// 解码 Base16384 UTF-16 BE 编码数据到二进制数据。
 	/// </summary>
 	/// <param name="data">Base16384 UTF-16 BE 编码数据</param>
+	/// <param name="dataLength">Base16384 UTF-16 BE 编码数据有效长度</param>
 	/// <param name="bufferPtr">输出缓冲区指针</param>
 	/// <param name="bufferLength">输出缓冲区长度</param>
 	/// <returns>已写入输出缓冲区的内容的长度</returns>
-	public static unsafe int Decode(byte[] data, byte* bufferPtr, int bufferLength) {
-		var dataLength = data.Length;
+	public static unsafe int Decode(byte[] data, int dataLength, byte* bufferPtr, int bufferLength) {
 		var dataPtr = (byte*)Marshal.AllocHGlobal(dataLength);
 		Marshal.Copy(data, 0, (IntPtr)dataPtr, dataLength);
 
@@ -87,10 +87,29 @@ public static partial class Base16384 {
 	/// <summary>
 	/// 编码二进制数据到 Base16384 UTF-16 BE 编码数据。
 	/// </summary>
+	/// <param name="data">二进制数据</param>
+	/// <param name="bufferPtr">输出缓冲区指针</param>
+	/// <param name="bufferLength">输出缓冲区长度</param>
+	/// <returns>已写入输出缓冲区的内容的长度</returns>
+	public static unsafe int Encode(byte[] data, byte* bufferPtr, int bufferLength) => Encode(data, data.Length, bufferPtr, bufferLength);
+
+	/// <summary>
+	/// 解码 Base16384 UTF-16 BE 编码数据到二进制数据。
+	/// </summary>
+	/// <param name="data">Base16384 UTF-16 BE 编码数据</param>
+	/// <param name="bufferPtr">输出缓冲区指针</param>
+	/// <param name="bufferLength">输出缓冲区长度</param>
+	/// <returns>已写入输出缓冲区的内容的长度</returns>
+	public static unsafe int Decode(byte[] data, byte* bufferPtr, int bufferLength) => Decode(data, data.Length, bufferPtr, bufferLength);
+
+
+	/// <summary>
+	/// 编码二进制数据到 Base16384 UTF-16 BE 编码数据。
+	/// </summary>
 	/// <param name="dataPtr">二进制数据指针</param>
 	/// <param name="dataLength">二进制数据长度</param>
 	/// <returns>编码结果</returns>
-	public static unsafe byte[] Encode(byte* dataPtr, int dataLength) {
+	public static unsafe ReadOnlySpan<byte> Encode(byte* dataPtr, int dataLength) {
 		var bufferLength = EncodeLength(dataLength);
 		var bufferPtr = (byte*)Marshal.AllocHGlobal(bufferLength);
 
@@ -108,7 +127,7 @@ public static partial class Base16384 {
 	/// <param name="dataPtr">Base16384 UTF-16 BE 编码数据指针</param>
 	/// <param name="dataLength">Base16384 UTF-16 BE 编码数据长度</param>
 	/// <returns>解码结果</returns>
-	public static unsafe byte[] Decode(byte* dataPtr, int dataLength) {
+	public static unsafe ReadOnlySpan<byte> Decode(byte* dataPtr, int dataLength) {
 		var bufferLength = DecodeLength(dataLength);
 		var bufferPtr = (byte*)Marshal.AllocHGlobal(bufferLength);
 
@@ -125,9 +144,9 @@ public static partial class Base16384 {
 	/// 编码二进制数据到 Base16384 UTF-16 BE 编码数据。
 	/// </summary>
 	/// <param name="data">二进制数据</param>
+	/// <param name="dataLength">二进制数据有效长度</param>
 	/// <returns>编码结果</returns>
-	public static unsafe byte[] Encode(byte[] data) {
-		var dataLength = data.Length;
+	public static unsafe ReadOnlySpan<byte> Encode(byte[] data, int dataLength) {
 		var dataPtr = (byte*)Marshal.AllocHGlobal(dataLength);
 		Marshal.Copy(data, 0, (IntPtr)dataPtr, dataLength);
 
@@ -148,9 +167,9 @@ public static partial class Base16384 {
 	/// 解码 Base16384 UTF-16 BE 编码数据到二进制数据。
 	/// </summary>
 	/// <param name="data">Base16384 UTF-16 BE 编码数据</param>
+	/// <param name="dataLength">Base16384 UTF-16 BE 编码数据有效长度</param>
 	/// <returns>解码结果</returns>
-	public static unsafe byte[] Decode(byte[] data) {
-		var dataLength = data.Length;
+	public static unsafe ReadOnlySpan<byte> Decode(byte[] data, int dataLength) {
 		var dataPtr = (byte*)Marshal.AllocHGlobal(dataLength);
 		Marshal.Copy(data, 0, (IntPtr)dataPtr, dataLength);
 
@@ -166,4 +185,19 @@ public static partial class Base16384 {
 
 		return result;
 	}
+
+
+	/// <summary>
+	/// 编码二进制数据到 Base16384 UTF-16 BE 编码数据。
+	/// </summary>
+	/// <param name="data">二进制数据</param>
+	/// <returns>编码结果</returns>
+	public static unsafe ReadOnlySpan<byte> Encode(byte[] data) => Encode(data, data.Length);
+
+	/// <summary>
+	/// 解码 Base16384 UTF-16 BE 编码数据到二进制数据。
+	/// </summary>
+	/// <param name="data">Base16384 UTF-16 BE 编码数据</param>
+	/// <returns>解码结果</returns>
+	public static unsafe ReadOnlySpan<byte> Decode(byte[] data) => Decode(data, data.Length);
 }
