@@ -27,7 +27,7 @@ public static partial class Base16384 {
 	/// <summary>
 	/// 编码后数据缓冲区长度。
 	/// </summary>
-	public const int Buffer1Length = (8192 * 1024 / 8 * 8) + 2;
+	public const int Buffer1Length = 8192 * 1024 / 8 * 8 + 2;
 
 
 	/// <summary>
@@ -111,19 +111,17 @@ public static partial class Base16384 {
 	/// <returns>已写入的数据长度</returns>
 	public static long DecodeToStream(Stream stream, Stream output) {
 		if (stream.Length > Buffer1Length) {
-#if !DEBUG
-			throw new Exception("暂不支持超过 " + Buffer1Length + " 字节的数据流。");
-#endif
-			var buffer1 = new byte[Buffer1Length];
+			var bufferLength = Buffer1Length - 2;
+			var buffer = new byte[bufferLength];
 
 			byte end; // skipcq: CS-W1022 赋值的确是不必要的
 			int readCount, writeCount = 0; // skipcq: CS-W1022 赋值的确是不必要的
-			while ((readCount = stream.Read(buffer1, 0, Buffer1Length)) > 0) {
+			while ((readCount = stream.Read(buffer, 0, bufferLength)) > 0) {
 				if (Convert.ToBoolean(end = IsNextEnd(stream))) {
-					buffer1[readCount++] = (byte)'=';
-					buffer1[readCount++] = end;
+					buffer[readCount++] = 61; // (byte)'='
+					buffer[readCount++] = end;
 				}
-				var decodedData = Decode(buffer1, readCount);
+				var decodedData = Decode(buffer, readCount);
 				output.Write(decodedData);
 				writeCount += decodedData.Length;
 			}

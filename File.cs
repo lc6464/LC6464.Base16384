@@ -7,7 +7,7 @@ public static partial class Base16384 {
 	/// <summary>
 	/// UTF-16 BE 编码的 BOM，应在文件头部出现。
 	/// </summary>
-	public static ReadOnlySpan<byte> Utf16BEPreamble => new byte[] { 0xfe, 0xff };
+	public static ReadOnlySpan<byte> Utf16BEPreamble => new byte[] { 0xFE, 0xFF };
 
 
 	/// <summary>
@@ -70,7 +70,9 @@ public static partial class Base16384 {
 	/// <returns>已写入的数据长度</returns>
 	public static long DecodeFromFileToStream(FileInfo fileInfo, Stream output) {
 		using var file = fileInfo.OpenRead();
-		file.Seek(Utf16BEPreamble.Length, SeekOrigin.Begin);
+		if (!(file.ReadByte() == 0xFE && file.ReadByte() == 0xFF)) {
+			file.Position = 0; // 如果是无 BOM 的非标准文件则回退
+		}
 		return DecodeToStream(file, output);
 	}
 
@@ -82,10 +84,9 @@ public static partial class Base16384 {
 	/// <param name="outputFileInfo">Base16384 UTF-16 BE 编码文件信息</param>
 	/// <returns>已写入的数据长度</returns>
 	public static long EncodeFromFileToNewFile(FileInfo fileInfo, FileInfo outputFileInfo) {
-		using var file = fileInfo.OpenRead();
 		using var output = outputFileInfo.Create();
 		output.Write(Utf16BEPreamble);
-		return EncodeToStream(file, output);
+		return EncodeFromFileToStream(fileInfo, output);
 	}
 
 	/// <summary>
@@ -95,9 +96,7 @@ public static partial class Base16384 {
 	/// <param name="outputFileInfo">二进制文件信息</param>
 	/// <returns>已写入的数据长度</returns>
 	public static long DecodeFromFileToNewFile(FileInfo fileInfo, FileInfo outputFileInfo) {
-		using var file = fileInfo.OpenRead();
 		using var output = outputFileInfo.Create();
-		file.Seek(Utf16BEPreamble.Length, SeekOrigin.Begin);
-		return DecodeToStream(file, output);
+		return DecodeFromFileToStream(fileInfo, output);
 	}
 }
