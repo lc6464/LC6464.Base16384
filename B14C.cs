@@ -32,7 +32,8 @@ public static partial class Base16384 {
 
 
 	/// <summary>
-	/// 编码二进制数据到 Base16384 UTF-16 BE 编码数据。
+	/// 编码二进制数据到 Base16384 UTF-16 BE 编码数据。<br/>
+	/// 不建议直接使用此方法，请尽可能使用形参中不包含指针的重载。
 	/// </summary>
 	/// <param name="dataPtr">二进制数据指针</param>
 	/// <param name="dataLength">二进制数据长度</param>
@@ -101,7 +102,8 @@ public static partial class Base16384 {
 	}
 
 	/// <summary>
-	/// 解码 Base16384 UTF-16 BE 编码数据到二进制数据。
+	/// 解码 Base16384 UTF-16 BE 编码数据到二进制数据。<br/>
+	/// 不建议直接使用此方法，请尽可能使用形参中不包含指针的重载。
 	/// </summary>
 	/// <param name="dataPtr">Base16384 UTF-16 BE 编码数据指针</param>
 	/// <param name="dataLength">Base16384 UTF-16 BE 编码数据长度</param>
