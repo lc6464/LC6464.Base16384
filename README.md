@@ -4,6 +4,8 @@
 [GitHub 项目](https://github.com/lc6464/LC6464.Base16384 "GitHub.Com")
 
 Base16384 编解码器的 .NET 实现。
+参考：[fumiama/base16384](https://github.com/fumiama/base16384 "GitHub: fumiama/base16384")
+使用：[lc6464/Base16384.Net](https://github.com/lc6464/Base16384.Net "GitHub: lc6464/Base16384.Net")
 
 ## 使用方法
 `Example.csproj`:
