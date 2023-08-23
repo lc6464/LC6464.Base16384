@@ -124,7 +124,7 @@ public static partial class Base16384 {
 				writeCount += decodedData.Length;
 			}
 			output.Flush();
-			
+
 			return writeCount;
 		} else {
 			Span<byte> data = new(new byte[stream.Length]);
