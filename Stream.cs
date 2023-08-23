@@ -94,7 +94,7 @@ public static partial class Base16384 {
 			return writeCount;
 		}
 		{
-			Span<byte> data = new(new byte[stream.Length]);
+			Span<byte> data = new(new byte[stream.Length - stream.Position]);
 			_ = stream.Read(data);
 			var encodedData = Encode(data.ToArray());
 			output.Write(encodedData);
@@ -111,6 +111,9 @@ public static partial class Base16384 {
 	/// <returns>已写入的数据长度</returns>
 	public static long DecodeToStream(Stream stream, Stream output) {
 		if (stream.Length > Buffer1Length) {
+#if !DEBUG
+			throw new Exception("暂不支持超过 " + Buffer1Length + " 字节的数据流。");
+#endif
 			var buffer1 = new byte[Buffer1Length];
 
 			byte end; // skipcq: CS-W1022 赋值的确是不必要的
@@ -129,7 +132,7 @@ public static partial class Base16384 {
 			return writeCount;
 		}
 		{
-			Span<byte> data = new(new byte[stream.Length]);
+			Span<byte> data = new(new byte[stream.Length - stream.Position]);
 			_ = stream.Read(data);
 			var decodedData = Decode(data.ToArray());
 			output.Write(decodedData);
