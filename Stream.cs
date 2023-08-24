@@ -118,7 +118,7 @@ public static partial class Base16384 {
 			int readCount, writeCount = 0; // skipcq: CS-W1022 赋值的确是不必要的
 			while ((readCount = stream.Read(buffer, 0, bufferLength)) > 0) {
 				if (Convert.ToBoolean(end = IsNextEnd(stream))) {
-					buffer[readCount++] = 61; // (byte)'='
+					buffer[readCount++] = 61; // (byte)'=' // skipcq: CS-W1082 readCount 值已递增，不会被后续语句覆盖
 					buffer[readCount++] = end;
 				}
 				var decodedData = Decode(buffer, readCount);
