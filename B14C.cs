@@ -95,7 +95,7 @@ public static partial class Base16384 {
 			}
 			sum += 0x004e004e004e004e;
 			values[n] = BitConverter.IsLittleEndian ? sum : BinaryPrimitives.ReverseEndianness(sum);
-			bufferPtr[outLength - 2] = (byte)'=';
+			bufferPtr[outLength - 2] = 61; // (byte)'='
 			bufferPtr[outLength - 1] = (byte)offset;
 		}
 		return outLength;

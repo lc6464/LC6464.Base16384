@@ -19,7 +19,7 @@ Base16384 编解码器的 .NET 实现。
 		<!-- 一些东西 -->
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="LC6464.Base16384" Version="1.0.0" />
+		<PackageReference Include="LC6464.Base16384" Version="1.1.0" />
 		<!-- PackageReference，建议使用 Visual Studio 或 dotnet cli 等工具添加 -->
 	</ItemGroup>
 	<ItemGroup>
@@ -35,7 +35,5 @@ Console.Write("请输入要编码的字符串：");
 var input = Console.ReadLine() ?? "";
 var data = Encoding.UTF8.GetBytes(input);
 
-var result = Base16384.Encode(data);
-
-File.WriteAllBytes("output.txt", result);
+var result = Base16384.EncodeToNewFile(data, new("output.txt"));
 ```
