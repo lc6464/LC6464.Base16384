@@ -27,7 +27,7 @@ public static partial class Base16384 {
 	/// <summary>
 	/// 编码后数据缓冲区长度。
 	/// </summary>
-	public const int Buffer1Length = 8192 * 1024 / 8 * 8 + 2;
+	public const int Buffer1Length = 8192 * 1024 / 8 * 8;
 
 
 	/// <summary>
@@ -111,12 +111,11 @@ public static partial class Base16384 {
 	/// <returns>已写入的数据长度</returns>
 	public static long DecodeToStream(Stream stream, Stream output) {
 		if (stream.Length > Buffer1Length) {
-			var bufferLength = Buffer1Length - 2;
-			var buffer = new byte[bufferLength];
+			var buffer = new byte[Buffer1Length];
 
 			byte end; // skipcq: CS-W1022 赋值的确是不必要的
 			int readCount, writeCount = 0; // skipcq: CS-W1022 赋值的确是不必要的
-			while ((readCount = stream.Read(buffer, 0, bufferLength)) > 0) {
+			while ((readCount = stream.Read(buffer, 0, Buffer1Length)) > 0) {
 				if (Convert.ToBoolean(end = IsNextEnd(stream))) {
 					buffer[readCount++] = 61; // (byte)'=' // skipcq: CS-W1082 readCount 值已递增，不会被后续语句覆盖
 					buffer[readCount++] = end;
