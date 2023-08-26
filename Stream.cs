@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace LC6464.Base16384;
+﻿namespace LC6464.Base16384;
 
 /// <summary>
 /// Base16384 编解码器。
@@ -124,12 +122,13 @@ public static partial class Base16384 {
 	/// <returns>已写入的数据长度</returns>
 	public static long DecodeToStream(Stream stream, Stream output, Span<byte> buffer) {
 		if (stream.Length > Buffer1Length) {
-			if (buffer.Length < Buffer1Length) {
+			if (buffer.Length < Buffer1Length + 2) {
 				throw new ArgumentException("外部提供的缓存空间不足，无法完成解码。", nameof(buffer));
 			}
 
+			var readingBuffer = buffer[..Buffer1Length]; // 由于下面可能会给 buffer 添加两个字节的数值，为防止溢出，这里只能使用临时变量
 			byte end; // skipcq: CS-W1022 对 end 赋值的确是不必要的
-			int readCount = stream.Read(buffer),
+			int readCount = stream.Read(readingBuffer),
 				writeCount = 0;
 			do {
 				if (Convert.ToBoolean(end = IsNextEnd(stream))) {
@@ -139,7 +138,7 @@ public static partial class Base16384 {
 				var decodedData = Decode(buffer, readCount);
 				output.Write(decodedData);
 				writeCount += decodedData.Length;
-			} while ((readCount = stream.Read(buffer)) > 0);
+			} while ((readCount = stream.Read(readingBuffer)) > 0);
 			output.Flush();
 
 			return writeCount;
@@ -173,7 +172,7 @@ public static partial class Base16384 {
 	/// <param name="output">输出数据流</param>
 	/// <returns>已写入的数据长度</returns>
 	public static long DecodeToStream(Stream stream, Stream output) =>
-		DecodeToStream(stream, output, new byte[stream.Length > Buffer1Length ? Buffer1Length : stream.Length - stream.Position]);
+		DecodeToStream(stream, output, new byte[stream.Length > Buffer1Length ? Buffer1Length + 2 : stream.Length - stream.Position]);
 
 
 	/// <summary>

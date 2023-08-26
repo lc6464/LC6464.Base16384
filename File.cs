@@ -70,7 +70,7 @@ public static partial class Base16384 {
 	/// <returns>已写入的数据长度</returns>
 	public static long DecodeFromFileToStream(FileInfo fileInfo, Stream output) {
 		using var file = fileInfo.OpenRead();
-		if (!(file.ReadByte() == 0xFE && file.ReadByte() == 0xFF)) {
+		if (file.ReadByte() is not (0xFE and 0xFF)) {
 			file.Position = 0; // 如果是无 BOM 的非标准文件则回退
 		}
 		return DecodeToStream(file, output);
