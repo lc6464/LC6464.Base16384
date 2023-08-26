@@ -37,9 +37,8 @@ public static partial class Base16384 {
 	/// <param name="dataPtr">二进制数据指针</param>
 	/// <param name="dataLength">二进制数据长度</param>
 	/// <param name="bufferPtr">输出缓冲区指针</param>
-	/// <param name="bufferLength">输出缓冲区长度</param>
 	/// <returns>已写入输出缓冲区的内容的长度</returns>
-	public static unsafe int Encode(byte* dataPtr, int dataLength, byte* bufferPtr, int bufferLength) {
+	public static unsafe int Encode(byte* dataPtr, int dataLength, byte* bufferPtr) {
 		var outLength = dataLength / 7 * 8;
 		var offset = dataLength % 7;
 		switch (offset) {   // 算上偏移标志字符占用的2字节
@@ -106,9 +105,8 @@ public static partial class Base16384 {
 	/// <param name="dataPtr">Base16384 UTF-16 BE 编码数据指针</param>
 	/// <param name="dataLength">Base16384 UTF-16 BE 编码数据长度</param>
 	/// <param name="bufferPtr">输出缓冲区指针</param>
-	/// <param name="bufferLength">输出缓冲区长度</param>
 	/// <returns>已写入输出缓冲区的内容的长度</returns>
-	public static unsafe int Decode(byte* dataPtr, int dataLength, byte* bufferPtr, int bufferLength) {
+	public static unsafe int Decode(byte* dataPtr, int dataLength, byte* bufferPtr) {
 		var outLength = dataLength;
 		var offset = 0;
 		if (dataPtr[dataLength - 2] == '=') {
