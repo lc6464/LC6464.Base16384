@@ -11,7 +11,7 @@ public static partial class Base16384 {
 	/// <param name="output">输出数据流</param>
 	/// <returns>已写入的数据长度</returns>
 	public static long EncodeToStream(Stream stream, Stream output) =>
-		EncodeToStream(stream, output, new byte[stream.Length > Buffer0Length ? Buffer0Length : stream.Length - stream.Position]);
+		EncodeToStream(stream, output, new byte[stream.Length > Buffer0Length ? Buffer0Length : stream.Length - stream.Position], new byte[EncodeLength(stream.Length > Buffer0Length ? Buffer0Length : stream.Length - stream.Position)]);
 
 	/// <summary>
 	/// 解码 Base16384 UTF-16 BE 编码数据流中的数据至二进制数据，追加到输出数据流。
@@ -20,7 +20,7 @@ public static partial class Base16384 {
 	/// <param name="output">输出数据流</param>
 	/// <returns>已写入的数据长度</returns>
 	public static long DecodeToStream(Stream stream, Stream output) =>
-		DecodeToStream(stream, output, new byte[stream.Length > Buffer1Length ? Buffer1Length + 2 : stream.Length - stream.Position]);
+		DecodeToStream(stream, output, new byte[stream.Length > Buffer1Length ? Buffer1Length + 2 : stream.Length - stream.Position], new byte[DecodeLength(stream.Length > Buffer1Length ? Buffer1Length : stream.Length - stream.Position)]);
 
 
 	/// <summary>
@@ -30,7 +30,7 @@ public static partial class Base16384 {
 	/// <param name="output">输出数据流</param>
 	/// <returns>已写入的数据长度</returns>
 	public static long EncodeToStream(ReadOnlySpan<byte> data, Stream output) =>
-		EncodeToStream(data, output, data.Length > Buffer0Length ? new byte[Buffer0Length] : Span<byte>.Empty);
+		EncodeToStream(data, output, new byte[EncodeLength(Math.Min(Buffer0Length, data.Length))]);
 
 	/// <summary>
 	/// 解码 Base16384 UTF-16 BE 编码数据至二进制数据，追加到输出数据流。
@@ -39,7 +39,7 @@ public static partial class Base16384 {
 	/// <param name="output">输出数据流</param>
 	/// <returns>已写入的数据长度</returns>
 	public static long DecodeToStream(ReadOnlySpan<byte> data, Stream output) =>
-		DecodeToStream(data, output, data.Length > Buffer1Length ? new byte[Buffer1Length + 2] : Span<byte>.Empty);
+		DecodeToStream(data, output, new byte[DecodeLength(Math.Min(Buffer1Length, data.Length))]);
 
 
 	/// <summary>

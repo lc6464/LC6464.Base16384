@@ -39,7 +39,7 @@ public static partial class Base16384 {
 	/// <param name="bufferPtr">输出缓冲区指针</param>
 	/// <returns>已写入输出缓冲区的内容的长度</returns>
 	public static unsafe int Encode(byte* dataPtr, int dataLength, byte* bufferPtr) {
-		EncodeLength(dataLength, out var outLength, out var offset);
+		EncodeLengthInternal(dataLength, out var outLength, out var offset);
 		var values = (ulong*)bufferPtr;
 		ulong n = 0;
 		long i = 0;

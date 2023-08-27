@@ -11,12 +11,13 @@ public static partial class Base16384 {
 	/// <param name="stream">二进制数据流</param>
 	/// <param name="fileInfo">创建的 Base16384 UTF-16 BE 编码文件信息</param>
 	/// <param name="buffer">外部提供的缓存空间（若 <paramref name="stream"/>.Length > <see cref="Buffer0Length"/>，则长度必须大于等于 <see cref="Buffer0Length"/>；否则长度必须大于等于 <paramref name="stream"/>.Length - <paramref name="stream"/>.Position）</param>
+	/// <param name="encodingBuffer">外部提供的用于编码的缓存空间（若 <paramref name="stream"/>.Length > <see cref="Buffer0Length"/>，则长度必须大于等于 <see cref="EncodeLength"/>(<see cref="Buffer0Length"/>)；否则长度必须大于等于 <see cref="EncodeLength"/>(<paramref name="stream"/>.Length - <paramref name="stream"/>.Position)）</param>
 	/// <exception cref="ArgumentException">外部提供的缓存空间不足</exception>
 	/// <returns>已写入的数据长度</returns>
-	public static long EncodeToNewFile(Stream stream, FileInfo fileInfo, Span<byte> buffer) {
+	public static long EncodeToNewFile(Stream stream, FileInfo fileInfo, Span<byte> buffer, Span<byte> encodingBuffer) {
 		using var file = fileInfo.Create();
 		file.Write(Utf16BEPreamble);
-		return EncodeToStream(stream, file, buffer);
+		return EncodeToStream(stream, file, buffer, encodingBuffer);
 	}
 
 	/// <summary>
@@ -24,12 +25,14 @@ public static partial class Base16384 {
 	/// 特别提醒：必须保证外部提供的缓存空间长度足够大，否则将会引发异常。
 	/// </summary>
 	/// <param name="stream">Base16384 UTF-16 BE 编码数据流</param>
-	/// <param name="fileInfo">创建的二进制文件信息</param><param name="buffer">外部提供的缓存空间（若 <paramref name="stream"/>.Length > <see cref="Buffer1Length"/>，则长度必须大于等于 <see cref="Buffer1Length"/> + 2；否则长度必须大于等于 <paramref name="stream"/>.Length - <paramref name="stream"/>.Position）</param>
+	/// <param name="fileInfo">创建的二进制文件信息</param>
+	/// <param name="buffer">外部提供的缓存空间（若 <paramref name="stream"/>.Length > <see cref="Buffer1Length"/>，则长度必须大于等于 <see cref="Buffer1Length"/> + 2；否则长度必须大于等于 <paramref name="stream"/>.Length - <paramref name="stream"/>.Position）</param>
+	/// <param name="decodingBuffer">外部提供的用于编码的缓存空间（若 <paramref name="stream"/>.Length > <see cref="Buffer1Length"/>，则长度必须大于等于 <see cref="DecodeLength"/>(<see cref="Buffer1Length"/>)；否则长度必须大于等于 <see cref="DecodeLength"/>(<paramref name="stream"/>.Length - <paramref name="stream"/>.Position)）</param>
 	/// <exception cref="ArgumentException">外部提供的缓存空间不足</exception>
 	/// <returns>已写入的数据长度</returns>
-	public static long DecodeToNewFile(Stream stream, FileInfo fileInfo, Span<byte> buffer) {
+	public static long DecodeToNewFile(Stream stream, FileInfo fileInfo, Span<byte> buffer, Span<byte> decodingBuffer) {
 		using var file = fileInfo.Create();
-		return DecodeToStream(stream, file, buffer);
+		return DecodeToStream(stream, file, buffer, decodingBuffer);
 	}
 
 
@@ -39,13 +42,13 @@ public static partial class Base16384 {
 	/// </summary>
 	/// <param name="data">二进制数据</param>
 	/// <param name="fileInfo">创建的 Base16384 UTF-16 BE 编码文件信息</param>
-	/// <param name="buffer">外部提供的缓存空间（若 <paramref name="data"/>.Length > <see cref="Buffer0Length"/>，则长度必须大于等于 <see cref="Buffer0Length"/>）</param>
+	/// <param name="encodingBuffer">外部提供的用于编码的缓存空间（若 <paramref name="data"/>.Length > <see cref="Buffer0Length"/>，则长度必须大于等于 <see cref="EncodeLength"/>(<see cref="Buffer0Length"/>)；否则长度必须大于等于 <see cref="EncodeLength"/>(<paramref name="data"/>.Length)）</param>
 	/// <exception cref="ArgumentException">外部提供的缓存空间不足</exception>
 	/// <returns>已写入的数据长度</returns>
-	public static long EncodeToNewFile(ReadOnlySpan<byte> data, FileInfo fileInfo, Span<byte> buffer) {
+	public static long EncodeToNewFile(ReadOnlySpan<byte> data, FileInfo fileInfo, Span<byte> encodingBuffer) {
 		using var file = fileInfo.Create();
 		file.Write(Utf16BEPreamble);
-		return EncodeToStream(data, file, buffer);
+		return EncodeToStream(data, file, encodingBuffer);
 	}
 
 	/// <summary>
@@ -54,12 +57,12 @@ public static partial class Base16384 {
 	/// </summary>
 	/// <param name="data">Base16384 UTF-16 BE 编码数据</param>
 	/// <param name="fileInfo">创建的二进制文件信息</param>
-	/// <param name="buffer">外部提供的缓存空间（若 <paramref name="data"/>.Length > <see cref="Buffer1Length"/>，则长度必须大于等于 <see cref="Buffer1Length"/> + 2）</param>
+	/// <param name="decodingBuffer">外部提供的用于编码的缓存空间（若 <paramref name="data"/>.Length > <see cref="Buffer1Length"/>，则长度必须大于等于 <see cref="DecodeLength"/>(<see cref="Buffer1Length"/>)；否则长度必须大于等于 <see cref="DecodeLength"/>(<paramref name="data"/>.Length)）</param>
 	/// <exception cref="ArgumentException">外部提供的缓存空间不足</exception>
 	/// <returns>已写入的数据长度</returns>
-	public static long DecodeToNewFile(ReadOnlySpan<byte> data, FileInfo fileInfo, Span<byte> buffer) {
+	public static long DecodeToNewFile(ReadOnlySpan<byte> data, FileInfo fileInfo, Span<byte> decodingBuffer) {
 		using var file = fileInfo.Create();
-		return DecodeToStream(data, file, buffer);
+		return DecodeToStream(data, file, decodingBuffer);
 	}
 
 
@@ -70,11 +73,12 @@ public static partial class Base16384 {
 	/// <param name="fileInfo">二进制文件信息</param>
 	/// <param name="output">输出数据流</param>
 	/// <param name="buffer">外部提供的缓存空间（若 <paramref name="fileInfo"/>.Length > <see cref="Buffer0Length"/>，则长度必须大于等于 <see cref="Buffer0Length"/>；否则长度必须大于等于 <paramref name="fileInfo"/>.Length）</param>
+	/// <param name="encodingBuffer">外部提供的用于编码的缓存空间（若 <paramref name="fileInfo"/>.Length > <see cref="Buffer0Length"/>，则长度必须大于等于 <see cref="EncodeLength"/>(<see cref="Buffer0Length"/>)；否则长度必须大于等于 <see cref="EncodeLength"/>(<paramref name="fileInfo"/>.Length)）</param>
 	/// <exception cref="ArgumentException">外部提供的缓存空间不足</exception>
 	/// <returns>已写入的数据长度</returns>
-	public static long EncodeFromFileToStream(FileInfo fileInfo, Stream output, Span<byte> buffer) {
+	public static long EncodeFromFileToStream(FileInfo fileInfo, Stream output, Span<byte> buffer, Span<byte> encodingBuffer) {
 		using var file = fileInfo.OpenRead();
-		return EncodeToStream(file, output, buffer);
+		return EncodeToStream(file, output, buffer, encodingBuffer);
 	}
 
 	/// <summary>
@@ -84,14 +88,15 @@ public static partial class Base16384 {
 	/// <param name="fileInfo">Base16384 UTF-16 BE 编码文件信息</param>
 	/// <param name="output">输出数据流</param>
 	/// <param name="buffer">外部提供的缓存空间（若 <paramref name="fileInfo"/>.Length > <see cref="Buffer1Length"/>，则长度必须大于等于 <see cref="Buffer1Length"/> + 2；否则长度必须大于等于 <paramref name="fileInfo"/>.Length）</param>
+	/// <param name="decodingBuffer">外部提供的用于编码的缓存空间（若 <paramref name="fileInfo"/>.Length > <see cref="Buffer1Length"/>，则长度必须大于等于 <see cref="DecodeLength"/>(<see cref="Buffer1Length"/>)；否则长度必须大于等于 <see cref="DecodeLength"/>(<paramref name="fileInfo"/>.Length)）</param>
 	/// <exception cref="ArgumentException">外部提供的缓存空间不足</exception>
 	/// <returns>已写入的数据长度</returns>
-	public static long DecodeFromFileToStream(FileInfo fileInfo, Stream output, Span<byte> buffer) {
+	public static long DecodeFromFileToStream(FileInfo fileInfo, Stream output, Span<byte> buffer, Span<byte> decodingBuffer) {
 		using var file = fileInfo.OpenRead();
 		if (((file.ReadByte() << 8) | file.ReadByte()) != 0xFEFF) {
 			file.Position = 0; // 如果是无 BOM 的非标准文件则回退
 		}
-		return DecodeToStream(file, output, buffer);
+		return DecodeToStream(file, output, buffer, decodingBuffer);
 	}
 
 
@@ -102,12 +107,13 @@ public static partial class Base16384 {
 	/// <param name="fileInfo">二进制文件信息</param>
 	/// <param name="outputFileInfo">Base16384 UTF-16 BE 编码文件信息</param>
 	/// <param name="buffer">外部提供的缓存空间（若 <paramref name="fileInfo"/>.Length > <see cref="Buffer0Length"/>，则长度必须大于等于 <see cref="Buffer0Length"/>；否则长度必须大于等于 <paramref name="fileInfo"/>.Length）</param>
+	/// <param name="encodingBuffer">外部提供的用于编码的缓存空间（若 <paramref name="fileInfo"/>.Length > <see cref="Buffer0Length"/>，则长度必须大于等于 <see cref="EncodeLength"/>(<see cref="Buffer0Length"/>)；否则长度必须大于等于 <see cref="EncodeLength"/>(<paramref name="fileInfo"/>.Length)）</param>
 	/// <exception cref="ArgumentException">外部提供的缓存空间不足</exception>
 	/// <returns>已写入的数据长度</returns>
-	public static long EncodeFromFileToNewFile(FileInfo fileInfo, FileInfo outputFileInfo, Span<byte> buffer) {
+	public static long EncodeFromFileToNewFile(FileInfo fileInfo, FileInfo outputFileInfo, Span<byte> buffer, Span<byte> encodingBuffer) {
 		using var output = outputFileInfo.Create();
 		output.Write(Utf16BEPreamble);
-		return EncodeFromFileToStream(fileInfo, output, buffer);
+		return EncodeFromFileToStream(fileInfo, output, buffer, encodingBuffer);
 	}
 
 	/// <summary>
@@ -117,10 +123,11 @@ public static partial class Base16384 {
 	/// <param name="fileInfo">Base16384 UTF-16 BE 编码文件信息</param>
 	/// <param name="outputFileInfo">二进制文件信息</param>
 	/// <param name="buffer">外部提供的缓存空间（若 <paramref name="fileInfo"/>.Length > <see cref="Buffer1Length"/>，则长度必须大于等于 <see cref="Buffer1Length"/> + 2；否则长度必须大于等于 <paramref name="fileInfo"/>.Length）</param>
+	/// <param name="decodingBuffer">外部提供的用于编码的缓存空间（若 <paramref name="fileInfo"/>.Length > <see cref="Buffer1Length"/>，则长度必须大于等于 <see cref="DecodeLength"/>(<see cref="Buffer1Length"/>)；否则长度必须大于等于 <see cref="DecodeLength"/>(<paramref name="fileInfo"/>.Length)）</param>
 	/// <exception cref="ArgumentException">外部提供的缓存空间不足</exception>
 	/// <returns>已写入的数据长度</returns>
-	public static long DecodeFromFileToNewFile(FileInfo fileInfo, FileInfo outputFileInfo, Span<byte> buffer) {
+	public static long DecodeFromFileToNewFile(FileInfo fileInfo, FileInfo outputFileInfo, Span<byte> buffer, Span<byte> decodingBuffer) {
 		using var output = outputFileInfo.Create();
-		return DecodeFromFileToStream(fileInfo, output, buffer);
+		return DecodeFromFileToStream(fileInfo, output, buffer, decodingBuffer);
 	}
 }

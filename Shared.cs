@@ -20,7 +20,7 @@ public static partial class Base16384 {
 	}
 
 
-	private static void EncodeLength(long dataLength, out long outLength, out long offset) {
+	private static void EncodeLengthInternal(long dataLength, out long outLength, out long offset) {
 		outLength = dataLength / 7 * 8;
 		offset = dataLength % 7;
 		switch (offset) {   // 算上偏移标志字符占用的2字节
@@ -52,6 +52,11 @@ public static partial class Base16384 {
 	/// </summary>
 	public static ReadOnlySpan<byte> Utf16BEPreamble => new byte[] { 0xFE, 0xFF };
 
+	/// <summary>
+	/// UTF-16 LE 编码的 BOM，应在文件头部出现。
+	/// </summary>
+	public static ReadOnlySpan<byte> Utf16LEPreamble => new byte[] { 0xFF, 0xFE };
+
 
 	/// <summary>
 	/// 计算编码指针需要的长度。
@@ -59,7 +64,7 @@ public static partial class Base16384 {
 	/// <param name="dataLength">数据长度</param>
 	/// <returns>编码指针需要的长度</returns>
 	public static long EncodeLength(long dataLength) {
-		EncodeLength(dataLength, out var outLength, out _);
+		EncodeLengthInternal(dataLength, out var outLength, out _);
 		return outLength + 8 + 16;  // 冗余的8B用于可能的结尾的覆盖，再加上16B备用
 	}
 
@@ -82,5 +87,20 @@ public static partial class Base16384 {
 			default: break; // outLength += 0;
 		}
 		return (outLength / 8 * 7) + offset + 1 + 16; // 多出1字节用于循环覆盖，再加上16B备用
+	}
+
+
+	private static ReadOnlySpan<T> CopyToManagedMemory<T>(this ReadOnlySpan<T> data) {
+		Span<T> result = new(new T[data.Length]);
+		data.CopyTo(result);
+		return result;
+	}
+
+	private static unsafe ReadOnlySpan<byte> MoveFromUnmanagedMemoryToManagedMemory(this ReadOnlySpan<byte> data) {
+		var result = data.CopyToManagedMemory();
+		fixed (byte* ptr = data) {
+			Marshal.FreeHGlobal((nint)ptr);
+		}
+		return result;
 	}
 }
