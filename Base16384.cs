@@ -5,49 +5,6 @@
 /// </summary>
 public static partial class Base16384 {
 	/// <summary>
-	/// 计算编码指针需要的长度。
-	/// </summary>
-	/// <param name="dataLength">数据长度</param>
-	/// <returns>编码指针需要的长度</returns>
-	public static int EncodeLength(int dataLength) {
-		var outLength = dataLength / 7 * 8;
-		var offset = dataLength % 7;
-		switch (offset) {   // 算上偏移标志字符占用的2字节
-			case 0: break;
-			case 1: outLength += 4; break;
-			case 2:
-			case 3: outLength += 6; break;
-			case 4:
-			case 5: outLength += 8; break;
-			case 6: outLength += 10; break;
-			default: break; // outLength += 0;
-		}
-		return outLength + 8 + 16;  // 冗余的8B用于可能的结尾的覆盖，再加上16B备用
-	}
-
-	/// <summary>
-	/// 计算解码指针需要的长度。
-	/// </summary>
-	/// <param name="dataLength">数据长度</param>
-	/// <param name="offset">偏移量（默认为0，作用未知，可参见 GitHub: fumiama/base16384。）</param>
-	/// <returns>解码指针需要的长度</returns>
-	public static int DecodeLength(int dataLength, int offset = 0) {
-		var outLength = dataLength;
-		switch (offset) {   // 算上偏移标志字符占用的2字节
-			case 0: break;
-			case 1: outLength -= 4; break;
-			case 2:
-			case 3: outLength -= 6; break;
-			case 4:
-			case 5: outLength -= 8; break;
-			case 6: outLength -= 10; break;
-			default: break; // outLength += 0;
-		}
-		return (outLength / 8 * 7) + offset + 1 + 16; // 多出1字节用于循环覆盖，再加上16B备用
-	}
-
-
-	/// <summary>
 	/// 编码二进制数据到 Base16384 UTF-16 BE 编码数据。<br/>
 	/// 特别注意：此方法无法处理过大的数据，如需处理过大数据请使用不包含此提示的方法（如包含 <see cref="Stream"/> 的）！
 	/// 否则可能导致意外的结果或引发异常！
@@ -58,8 +15,7 @@ public static partial class Base16384 {
 	/// <returns>已写入输出缓冲区的内容的长度</returns>
 	public static unsafe int Encode(ReadOnlySpan<byte> data, int dataLength, byte* bufferPtr) {
 		fixed (byte* dataPtr = data) {
-			var result = Encode(dataPtr, dataLength, bufferPtr);
-			return result;
+			return Encode(dataPtr, dataLength, bufferPtr);
 		}
 	}
 
@@ -74,8 +30,7 @@ public static partial class Base16384 {
 	/// <returns>已写入输出缓冲区的内容的长度</returns>
 	public static unsafe int Decode(ReadOnlySpan<byte> data, int dataLength, byte* bufferPtr) {
 		fixed (byte* dataPtr = data) {
-			var result = Decode(dataPtr, dataLength, bufferPtr);
-			return result;
+			return Decode(dataPtr, dataLength, bufferPtr);
 		}
 	}
 
@@ -106,16 +61,72 @@ public static partial class Base16384 {
 	/// 特别注意：此方法无法处理过大的数据，如需处理过大数据请使用不包含此提示的方法（如包含 <see cref="Stream"/> 的）！
 	/// 否则可能导致意外的结果或引发异常！
 	/// </summary>
+	/// <param name="data">二进制数据</param>
+	/// <param name="dataLength">二进制数据有效长度</param>
+	/// <param name="buffer">输出缓冲区</param>
+	/// <returns>已写入输出缓冲区的内容的长度</returns>
+	public static unsafe int Encode(ReadOnlySpan<byte> data, int dataLength, ReadOnlySpan<byte> buffer) {
+		fixed (byte* dataPtr = data) {
+			fixed (byte* bufferPtr = buffer) {
+				return Encode(dataPtr, dataLength, bufferPtr);
+			}
+		}
+	}
+
+	/// <summary>
+	/// 解码 Base16384 UTF-16 BE 编码数据到二进制数据。<br/>
+	/// 特别注意：此方法无法处理过大的数据，如需处理过大数据请使用不包含此提示的方法（如包含 <see cref="Stream"/> 的）！
+	/// 否则可能导致意外的结果或引发异常！
+	/// </summary>
+	/// <param name="data">Base16384 UTF-16 BE 编码数据</param>
+	/// <param name="dataLength">Base16384 UTF-16 BE 编码数据有效长度</param>
+	/// <param name="buffer">输出缓冲区</param>
+	/// <returns>已写入输出缓冲区的内容的长度</returns>
+	public static unsafe int Decode(ReadOnlySpan<byte> data, int dataLength, ReadOnlySpan<byte> buffer) {
+		fixed (byte* dataPtr = data) {
+			fixed (byte* bufferPtr = buffer) {
+				return Decode(dataPtr, dataLength, bufferPtr);
+			}
+		}
+	}
+
+
+	/// <summary>
+	/// 编码二进制数据到 Base16384 UTF-16 BE 编码数据。<br/>
+	/// 特别注意：此方法无法处理过大的数据，如需处理过大数据请使用不包含此提示的方法（如包含 <see cref="Stream"/> 的）！
+	/// 否则可能导致意外的结果或引发异常！
+	/// </summary>
+	/// <param name="data">二进制数据</param>
+	/// <param name="buffer">输出缓冲区</param>
+	/// <returns>已写入输出缓冲区的内容的长度</returns>
+	public static unsafe int Encode(ReadOnlySpan<byte> data, ReadOnlySpan<byte> buffer) => Encode(data, data.Length, buffer);
+
+	/// <summary>
+	/// 解码 Base16384 UTF-16 BE 编码数据到二进制数据。<br/>
+	/// 特别注意：此方法无法处理过大的数据，如需处理过大数据请使用不包含此提示的方法（如包含 <see cref="Stream"/> 的）！
+	/// 否则可能导致意外的结果或引发异常！
+	/// </summary>
+	/// <param name="data">Base16384 UTF-16 BE 编码数据</param>
+	/// <param name="buffer">输出缓冲区</param>
+	/// <returns>已写入输出缓冲区的内容的长度</returns>
+	public static unsafe int Decode(ReadOnlySpan<byte> data, ReadOnlySpan<byte> buffer) => Decode(data, data.Length, buffer);
+
+
+	/// <summary>
+	/// 编码二进制数据到 Base16384 UTF-16 BE 编码数据。<br/>
+	/// 特别注意：此方法无法处理过大的数据，如需处理过大数据请使用不包含此提示的方法（如包含 <see cref="Stream"/> 的）！
+	/// 否则可能导致意外的结果或引发异常！
+	/// </summary>
 	/// <param name="dataPtr">二进制数据指针</param>
 	/// <param name="dataLength">二进制数据长度</param>
 	/// <returns>编码结果</returns>
 	public static unsafe ReadOnlySpan<byte> Encode(byte* dataPtr, int dataLength) {
-		var bufferLength = EncodeLength(dataLength);
+		var bufferLength = (int)EncodeLength(dataLength);
 		var bufferPtr = (byte*)Marshal.AllocHGlobal(bufferLength);
 
 		ReadOnlySpan<byte> result = new(bufferPtr, Encode(dataPtr, dataLength, bufferPtr));
 
-		Marshal.FreeHGlobal((nint)bufferPtr);
+		Marshal.FreeHGlobal((nint)bufferPtr); // 这里或许会把 result 的内存释放了，可能导致问题，@execute233 测试一下
 
 		return result;
 	}
@@ -129,12 +140,12 @@ public static partial class Base16384 {
 	/// <param name="dataLength">Base16384 UTF-16 BE 编码数据长度</param>
 	/// <returns>解码结果</returns>
 	public static unsafe ReadOnlySpan<byte> Decode(byte* dataPtr, int dataLength) {
-		var bufferLength = DecodeLength(dataLength);
+		var bufferLength = (int)DecodeLength(dataLength);
 		var bufferPtr = (byte*)Marshal.AllocHGlobal(bufferLength);
 
 		ReadOnlySpan<byte> result = new(bufferPtr, Decode(dataPtr, dataLength, bufferPtr));
 
-		Marshal.FreeHGlobal((nint)bufferPtr);
+		Marshal.FreeHGlobal((nint)bufferPtr); // 这里或许会把 result 的内存释放了，可能导致问题，@execute233 测试一下
 
 		return result;
 	}
@@ -150,14 +161,7 @@ public static partial class Base16384 {
 	/// <returns>编码结果</returns>
 	public static unsafe ReadOnlySpan<byte> Encode(ReadOnlySpan<byte> data, int dataLength) {
 		fixed (byte* dataPtr = data) {
-			var bufferLength = EncodeLength(dataLength);
-			var bufferPtr = (byte*)Marshal.AllocHGlobal(bufferLength);
-
-			ReadOnlySpan<byte> result = new(bufferPtr, Encode(dataPtr, dataLength, bufferPtr));
-
-			Marshal.FreeHGlobal((nint)dataPtr);
-
-			return result;
+			return Encode(dataPtr, dataLength);
 		}
 	}
 
@@ -171,14 +175,7 @@ public static partial class Base16384 {
 	/// <returns>解码结果</returns>
 	public static unsafe ReadOnlySpan<byte> Decode(ReadOnlySpan<byte> data, int dataLength) {
 		fixed (byte* dataPtr = data) {
-			var bufferLength = EncodeLength(dataLength);
-			var bufferPtr = (byte*)Marshal.AllocHGlobal(bufferLength);
-
-			ReadOnlySpan<byte> result = new(bufferPtr, Decode(dataPtr, dataLength, bufferPtr));
-
-			Marshal.FreeHGlobal((nint)dataPtr);
-
-			return result;
+			return Decode(dataPtr, dataLength);
 		}
 	}
 

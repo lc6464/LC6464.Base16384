@@ -39,18 +39,7 @@ public static partial class Base16384 {
 	/// <param name="bufferPtr">输出缓冲区指针</param>
 	/// <returns>已写入输出缓冲区的内容的长度</returns>
 	public static unsafe int Encode(byte* dataPtr, int dataLength, byte* bufferPtr) {
-		var outLength = dataLength / 7 * 8;
-		var offset = dataLength % 7;
-		switch (offset) {   // 算上偏移标志字符占用的2字节
-			case 0: break;
-			case 1: outLength += 4; break;
-			case 2:
-			case 3: outLength += 6; break;
-			case 4:
-			case 5: outLength += 8; break;
-			case 6: outLength += 10; break;
-			default: break; // outLength += 0;
-		}
+		EncodeLength(dataLength, out var outLength, out var offset);
 		var values = (ulong*)bufferPtr;
 		ulong n = 0;
 		long i = 0;
@@ -96,7 +85,7 @@ public static partial class Base16384 {
 			bufferPtr[outLength - 2] = 61; // (byte)'='
 			bufferPtr[outLength - 1] = (byte)offset;
 		}
-		return outLength;
+		return (int)outLength;
 	}
 
 	/// <summary>
