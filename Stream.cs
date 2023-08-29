@@ -28,7 +28,7 @@ public static partial class Base16384 {
 			int readCount = stream.Read(readingBuffer),
 				writeCount = 0;
 			do {
-				var encodedLength = Encode(buffer, readCount, encodingBuffer); // 编码结果直接写入缓冲区
+				var encodedLength = Encode(buffer[..readCount], encodingBuffer); // 编码结果写入缓冲区
 				output.Write(encodingBuffer[..encodeLength]); // 将缓冲区中指定长度的数据写入输出流
 				writeCount += encodedLength;
 			} while ((readCount = stream.Read(readingBuffer)) > 0);
@@ -46,7 +46,7 @@ public static partial class Base16384 {
 				throw new ArgumentException("外部提供的缓存空间不足，无法完成编码。", nameof(encodingBuffer));
 			}
 
-			var encodedLength = Encode(buffer, stream.Read(buffer), encodingBuffer);
+			var encodedLength = Encode(buffer[..stream.Read(buffer)], encodingBuffer);
 			output.Write(encodingBuffer[..encodedLength]); // 将缓冲区中指定长度的数据写入输出流
 			output.Flush();
 			return encodedLength;
@@ -82,8 +82,8 @@ public static partial class Base16384 {
 					buffer[readCount++] = 61; // (byte)'=' // skipcq: CS-W1082 readCount 值已递增，61 不会被后续语句覆盖
 					buffer[readCount++] = end;
 				}
-				var decodedLength = Decode(buffer, readCount, decodingBuffer);
-				output.Write(decodingBuffer[..decodedLength]);
+				var decodedLength = Decode(buffer[..readCount], decodingBuffer); // 解码结果写入缓冲区
+				output.Write(decodingBuffer[..decodedLength]); // 将缓冲区中指定长度的数据写入输出流
 				writeCount += decodedLength;
 			} while ((readCount = stream.Read(readingBuffer)) > 0);
 			output.Flush();
@@ -100,7 +100,7 @@ public static partial class Base16384 {
 				throw new ArgumentException("外部提供的缓存空间不足，无法完成解码。", nameof(decodingBuffer));
 			}
 
-			var decodedLength = Decode(buffer, stream.Read(buffer), decodingBuffer);
+			var decodedLength = Decode(buffer[..stream.Read(buffer)], decodingBuffer);
 			output.Write(decodingBuffer[..decodedLength]);
 			output.Flush();
 			return decodedLength;
@@ -128,11 +128,11 @@ public static partial class Base16384 {
 				encodedCount = 0,
 				writeCount = 0;
 			do {
-				var readCount = Math.Min(Buffer0Length, remainingCount);
+				var readCount = Math.Min(Buffer0Length, remainingCount); // 读取数据长度
 				remainingCount -= readCount;
 				encodedCount += readCount;
-				var encodedLength = Encode(data.Slice(encodedCount, readCount), readCount, encodingBuffer);
-				output.Write(encodingBuffer[..encodedLength]);
+				var encodedLength = Encode(data.Slice(encodedCount, readCount), encodingBuffer); // 编码结果写入缓冲区
+				output.Write(encodingBuffer[..encodedLength]); // 将缓冲区中指定长度的数据写入输出流
 				writeCount += encodedLength;
 			} while (remainingCount > 0);
 			output.Flush();
@@ -168,8 +168,8 @@ public static partial class Base16384 {
 				throw new ArgumentException("外部提供的缓存空间不足，无法完成解码。", nameof(decodingBuffer));
 			}
 
-			var memory = Marshal.AllocHGlobal(Buffer1Length + 2);
-			var buffer = new Span<byte>((byte*)memory, Buffer1Length + 2);
+			var memory = Marshal.AllocHGlobal(Buffer1Length + 2); // 临时储存待解码数据的非托管内存
+			var buffer = new Span<byte>((byte*)memory, Buffer1Length + 2); // 指向非托管内存的 Span
 
 			int remainingCount = data.Length,
 				decodedCount = 0,
@@ -187,7 +187,7 @@ public static partial class Base16384 {
 					buffer[readCount++] = data[^1];
 					remainingCount = 0;
 				}
-				var decodedLength = Decode(buffer, readCount, decodingBuffer);
+				var decodedLength = Decode(buffer[..readCount], decodingBuffer);
 				output.Write(decodingBuffer[..decodedLength]);
 				writeCount += decodedLength;
 
@@ -195,7 +195,7 @@ public static partial class Base16384 {
 			} while (remainingCount > 0);
 			output.Flush();
 
-			Marshal.FreeHGlobal(memory);
+			Marshal.FreeHGlobal(memory); // 释放非托管内存
 
 			return writeCount;
 		}
