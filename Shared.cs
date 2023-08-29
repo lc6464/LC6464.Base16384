@@ -90,13 +90,24 @@ public static partial class Base16384 {
 	}
 
 
-	private static ReadOnlySpan<T> CopyToManagedMemory<T>(this ReadOnlySpan<T> data) {
+	/// <summary>
+	/// 将 <paramref name="data"/>（可能在非托管内存中）复制到托管内存中。
+	/// </summary>
+	/// <typeparam name="T"><paramref name="data"/> 的类型</typeparam>
+	/// <param name="data">要复制的数据</param>
+	/// <returns>复制结果</returns>
+	public static ReadOnlySpan<T> CopyToManagedMemory<T>(this ReadOnlySpan<T> data) {
 		Span<T> result = new(new T[data.Length]);
 		data.CopyTo(result);
 		return result;
 	}
 
-	private static unsafe ReadOnlySpan<byte> MoveFromUnmanagedMemoryToManagedMemory(this ReadOnlySpan<byte> data) {
+	/// <summary>
+	/// 将非托管内存中的 <paramref name="data"/> 移动到托管内存中。
+	/// </summary>
+	/// <param name="data">要移动的数据</param>
+	/// <returns>移动结果</returns>
+	public static unsafe ReadOnlySpan<byte> MoveFromUnmanagedMemoryToManagedMemory(this ReadOnlySpan<byte> data) {
 		var result = data.CopyToManagedMemory();
 		fixed (byte* ptr = data) {
 			Marshal.FreeHGlobal((nint)ptr);
