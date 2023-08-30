@@ -29,7 +29,7 @@ public static partial class Base16384 {
 				writeCount = 0;
 			do {
 				var encodedLength = Encode(buffer[..readCount], encodingBuffer); // 编码结果写入缓冲区
-				output.Write(encodingBuffer[..encodeLength]); // 将缓冲区中指定长度的数据写入输出流
+				output.Write(encodingBuffer[..encodedLength]); // 将缓冲区中指定长度的数据写入输出流
 				writeCount += encodedLength;
 			} while ((readCount = stream.Read(readingBuffer)) > 0);
 			output.Flush();
