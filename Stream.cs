@@ -130,8 +130,8 @@ public static partial class Base16384 {
 			do {
 				var readCount = Math.Min(Buffer0Length, remainingCount); // 读取数据长度
 				remainingCount -= readCount;
-				encodedCount += readCount;
 				var encodedLength = Encode(data.Slice(encodedCount, readCount), encodingBuffer); // 编码结果写入缓冲区
+				encodedCount += readCount;
 				output.Write(encodingBuffer[..encodedLength]); // 将缓冲区中指定长度的数据写入输出流
 				writeCount += encodedLength;
 			} while (remainingCount > 0);
