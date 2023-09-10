@@ -13,16 +13,18 @@ public static partial class Base16384 {
 	/// <returns>UTF-8 编码的数据</returns>
 	public static ReadOnlySpan<byte> ConvertFromUtf16BEBytesToUtf8Bytes(this ReadOnlySpan<byte> data) =>
 		Encoding.Convert(Encoding.BigEndianUnicode, Encoding.UTF8, data.ToArray());
-
-#if DEBUG // 此处仍有问题，暂时不使用
+	
 	/// <summary>
 	/// 将 UTF-16 BE 编码的数据转换为 UTF-8 with BOM 编码的数据。
 	/// </summary>
 	/// <param name="data">UTF-16 BE 编码的数据</param>
 	/// <returns>UTF-8 with BOM 编码的数据</returns>
-	public static ReadOnlySpan<byte> ConvertFromUtf16BEBytesToUtf8BOMBytes(this ReadOnlySpan<byte> data) =>
-		Encoding.Convert(Encoding.BigEndianUnicode, new UTF8Encoding(true), data.ToArray());
-#endif
+	public static ReadOnlySpan<byte> ConvertFromUtf16BEBytesToUtf8BOMBytes(this ReadOnlySpan<byte> data) {
+		var temp = Encoding.Convert(Encoding.BigEndianUnicode, new UTF8Encoding(), data.ToArray());
+		var bom = new byte[]{ 0xEF, 0xBB, 0xBF };
+		var result = bom.Concat(temp).ToArray();
+		return new ReadOnlySpan<byte>(result);
+	}
 
 	/// <summary>
 	/// 将 UTF-16 BE 编码的数据转换为字符串。
