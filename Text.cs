@@ -20,7 +20,7 @@ public static partial class Base16384 {
 	/// <param name="data">UTF-16 BE 编码的数据</param>
 	/// <returns>UTF-8 with BOM 编码的数据</returns>
 	public static ReadOnlySpan<byte> ConvertFromUtf16BEBytesToUtf8BOMBytes(this ReadOnlySpan<byte> data) {
-		var temp = Encoding.Convert(Encoding.BigEndianUnicode, new UTF8Encoding(), data.ToArray());
+		var temp = Encoding.Convert(Encoding.BigEndianUnicode, Encoding.UTF8, data.ToArray());
 		var bom = new byte[]{ 0xEF, 0xBB, 0xBF };
 		var result = bom.Concat(temp).ToArray();
 		return new ReadOnlySpan<byte>(result);
