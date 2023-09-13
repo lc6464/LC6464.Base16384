@@ -57,6 +57,11 @@ public static partial class Base16384 {
 	/// </summary>
 	public static ReadOnlySpan<byte> Utf16LEPreamble => new byte[] { 0xFF, 0xFE };
 
+	/// <summary>
+	/// UTF-8 with BOM 编码的 BOM，应在文件头部出现。
+	/// </summary>
+	public static ReadOnlySpan<byte> Utf8Preamble => new byte[] { 0xEF, 0xBB, 0xBF };
+
 
 	/// <summary>
 	/// 计算编码指针需要的长度。
