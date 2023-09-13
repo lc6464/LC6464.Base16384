@@ -17,8 +17,8 @@
 		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<Authors>LC</Authors>
-		<Version>2.0.0-RC.1</Version>
-		<PackageReleaseNotes>完成了 ToUtf8BOMBytes 方法。</PackageReleaseNotes>
+		<Version>2.0.0-RC.2</Version>
+		<PackageReleaseNotes>更改 MoveFromUnmanagedMemory 相关 API 名称。</PackageReleaseNotes>
 	</PropertyGroup>
 	<ItemGroup>
 		<Using Include="System.Runtime.InteropServices" />

@@ -112,7 +112,7 @@ public static partial class Base16384 {
 	/// </summary>
 	/// <param name="data">要移动的数据</param>
 	/// <returns>移动结果</returns>
-	public static unsafe ReadOnlySpan<byte> MoveFromUnmanagedMemoryToManagedMemory(this ReadOnlySpan<byte> data) {
+	public static unsafe ReadOnlySpan<byte> MoveFromHGlobalToManagedMemory(this ReadOnlySpan<byte> data) {
 		var result = data.CopyToManagedMemory();
 		fixed (byte* ptr = data) {
 			Marshal.FreeHGlobal((nint)ptr);
