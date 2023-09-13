@@ -17,8 +17,8 @@
 		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<Authors>LC</Authors>
-		<Version>2.0.0-Preview.1</Version>
-		<PackageReleaseNotes>更改 API；极大地优化性能。</PackageReleaseNotes>
+		<Version>2.0.0-Preview.2</Version>
+		<PackageReleaseNotes>修复一些高级 API 逻辑错误以及 Span 访问越界等致命问题。</PackageReleaseNotes>
 	</PropertyGroup>
 	<ItemGroup>
 		<Using Include="System.Runtime.InteropServices" />
