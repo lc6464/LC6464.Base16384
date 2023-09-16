@@ -57,6 +57,11 @@ public static partial class Base16384 {
 	/// </summary>
 	public static ReadOnlySpan<byte> Utf16LEPreamble => new byte[] { 0xFF, 0xFE };
 
+	/// <summary>
+	/// UTF-8 with BOM 编码的 BOM，应在文件头部出现。
+	/// </summary>
+	public static ReadOnlySpan<byte> Utf8Preamble => new byte[] { 0xEF, 0xBB, 0xBF };
+
 
 	/// <summary>
 	/// 计算编码指针需要的长度。
@@ -107,7 +112,7 @@ public static partial class Base16384 {
 	/// </summary>
 	/// <param name="data">要移动的数据</param>
 	/// <returns>移动结果</returns>
-	public static unsafe ReadOnlySpan<byte> MoveFromUnmanagedMemoryToManagedMemory(this ReadOnlySpan<byte> data) {
+	public static unsafe ReadOnlySpan<byte> MoveFromHGlobalToManagedMemory(this ReadOnlySpan<byte> data) {
 		var result = data.CopyToManagedMemory();
 		fixed (byte* ptr = data) {
 			Marshal.FreeHGlobal((nint)ptr);

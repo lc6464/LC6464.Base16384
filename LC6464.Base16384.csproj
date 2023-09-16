@@ -17,8 +17,8 @@
 		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<Authors>LC</Authors>
-		<Version>2.0.0-Preview.1</Version>
-		<PackageReleaseNotes>更改 API；极大地优化性能。</PackageReleaseNotes>
+		<Version>2.0.0-RC.2</Version>
+		<PackageReleaseNotes>更改 MoveFromUnmanagedMemory 相关 API 名称。</PackageReleaseNotes>
 	</PropertyGroup>
 	<ItemGroup>
 		<Using Include="System.Runtime.InteropServices" />
