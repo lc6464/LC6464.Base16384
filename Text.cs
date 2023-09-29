@@ -19,12 +19,8 @@ public static partial class Base16384 {
 	/// </summary>
 	/// <param name="data">UTF-16 BE 编码的数据</param>
 	/// <returns>UTF-8 with BOM 编码的数据</returns>
-	public static ReadOnlySpan<byte> ConvertFromUtf16BEBytesToUtf8BOMBytes(this ReadOnlySpan<byte> data) {
-		Span<byte> buffer = new byte[data.Length + 3];
-		Utf8Preamble.CopyTo(buffer);
-		data.ConvertFromUtf16BEBytesToUtf8Bytes().CopyTo(buffer[3..]);
-		return buffer;
-	}
+	public static ReadOnlySpan<byte> ConvertFromUtf16BEBytesToUtf8BOMBytes(this ReadOnlySpan<byte> data) =>
+		new(Utf8Preamble.ToArray().Concat(data.ConvertFromUtf16BEBytesToUtf8Bytes().ToArray()).ToArray());
 
 
 	/// <summary>
