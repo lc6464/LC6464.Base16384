@@ -19,8 +19,13 @@ public static partial class Base16384 {
 	/// </summary>
 	/// <param name="data">UTF-16 BE 编码的数据</param>
 	/// <returns>UTF-8 with BOM 编码的数据</returns>
-	public static ReadOnlySpan<byte> ConvertFromUtf16BEBytesToUtf8BOMBytes(this ReadOnlySpan<byte> data) =>
-		new(Utf8Preamble.ToArray().Concat(data.ConvertFromUtf16BEBytesToUtf8Bytes().ToArray()).ToArray());
+	public static ReadOnlySpan<byte> ConvertFromUtf16BEBytesToUtf8BOMBytes(this ReadOnlySpan<byte> data) {
+		var utf8Bytes = data.ConvertFromUtf16BEBytesToUtf8Bytes();
+		Span<byte> result = new byte[utf8Bytes.Length + 3];
+		Utf8Preamble.CopyTo(result);
+		utf8Bytes.CopyTo(result[3..]);
+		return result;
+	}
 
 
 	/// <summary>
