@@ -5,6 +5,38 @@
 /// </summary>
 public static partial class Base16384 {
 	/// <summary>
+	/// 强制使用长流模式（分段编码）编码二进制数据流中的数据至 Base16384 UTF-16 BE 编码数据，追加到输出数据流。<br/>
+	/// 特别提醒：必须保证外部提供的缓存空间长度足够大，否则将会引发异常。
+	/// </summary>
+	/// <param name="stream">二进制数据流</param>
+	/// <param name="output">输出数据流</param>
+	/// <param name="buffer">外部提供的缓存空间（长度必须大于等于 <see cref="Buffer0Length"/>）</param>
+	/// <param name="encodingBuffer">外部提供的用于编码的缓存空间（长度必须大于等于 <see cref="EncodeLength"/>(<see cref="Buffer0Length"/>)）</param>
+	/// <exception cref="ArgumentException">外部提供的缓存空间不足</exception>
+	/// <returns>已写入的数据长度</returns>
+	public static unsafe long EncodeFromLongStreamToStream(Stream stream, Stream output, Span<byte> buffer, Span<byte> encodingBuffer) {
+		if (buffer.Length < Buffer0Length) {
+			throw new ArgumentException("外部提供的缓存空间不足，无法完成编码。", nameof(buffer));
+		}
+		var encodeLength = (int)EncodeLength(Buffer0Length);
+		if (encodingBuffer.Length < encodeLength) {
+			throw new ArgumentException("外部提供的缓存空间不足，无法完成编码。", nameof(encodingBuffer));
+		}
+
+		var readingBuffer = buffer[..Buffer0Length]; // 防止一次读入过多数据，此处使用切片
+		int readCount = stream.Read(readingBuffer),
+			writeCount = 0;
+		do {
+			var encodedLength = Encode(buffer[..readCount], encodingBuffer); // 编码结果写入缓冲区
+			output.Write(encodingBuffer[..encodedLength]); // 将缓冲区中指定长度的数据写入输出流
+			writeCount += encodedLength;
+		} while ((readCount = stream.Read(readingBuffer)) > 0);
+		output.Flush();
+
+		return writeCount;
+	}
+
+	/// <summary>
 	/// 编码二进制数据流中的数据至 Base16384 UTF-16 BE 编码数据，追加到输出数据流。<br/>
 	/// 特别提醒：必须保证外部提供的缓存空间长度足够大，否则将会引发异常。
 	/// </summary>
@@ -15,42 +47,60 @@ public static partial class Base16384 {
 	/// <exception cref="ArgumentException">外部提供的缓存空间不足</exception>
 	/// <returns>已写入的数据长度</returns>
 	public static unsafe long EncodeToStream(Stream stream, Stream output, Span<byte> buffer, Span<byte> encodingBuffer) {
-		if (stream.Length > Buffer0Length) {
-			if (buffer.Length < Buffer0Length) {
-				throw new ArgumentException("外部提供的缓存空间不足，无法完成编码。", nameof(buffer));
-			}
-			var encodeLength = (int)EncodeLength(Buffer0Length);
-			if (encodingBuffer.Length < encodeLength) {
-				throw new ArgumentException("外部提供的缓存空间不足，无法完成编码。", nameof(encodingBuffer));
-			}
-
-			var readingBuffer = buffer[..Buffer0Length]; // 防止一次读入过多数据，此处使用切片
-			int readCount = stream.Read(readingBuffer),
-				writeCount = 0;
-			do {
-				var encodedLength = Encode(buffer[..readCount], encodingBuffer); // 编码结果写入缓冲区
-				output.Write(encodingBuffer[..encodedLength]); // 将缓冲区中指定长度的数据写入输出流
-				writeCount += encodedLength;
-			} while ((readCount = stream.Read(readingBuffer)) > 0);
-			output.Flush();
-
-			return writeCount;
+		if (!stream.CanSeek || stream.Length > Buffer0Length) {
+			return EncodeFromLongStreamToStream(stream, output, buffer, encodingBuffer);
 		}
-		{
-			var remainingLength = stream.Length - stream.Position;
-			if (buffer.Length < remainingLength) {
-				throw new ArgumentException("外部提供的缓存空间不足，无法完成编码。", nameof(buffer));
-			}
-			var encodeLength = (int)EncodeLength(remainingLength);
-			if (encodingBuffer.Length < encodeLength) {
-				throw new ArgumentException("外部提供的缓存空间不足，无法完成编码。", nameof(encodingBuffer));
-			}
 
-			var encodedLength = Encode(buffer[..stream.Read(buffer)], encodingBuffer);
-			output.Write(encodingBuffer[..encodedLength]); // 将缓冲区中指定长度的数据写入输出流
-			output.Flush();
-			return encodedLength;
+		var remainingLength = stream.Length - stream.Position;
+		if (buffer.Length < remainingLength) {
+			throw new ArgumentException("外部提供的缓存空间不足，无法完成编码。", nameof(buffer));
 		}
+		var encodeLength = (int)EncodeLength(remainingLength);
+		if (encodingBuffer.Length < encodeLength) {
+			throw new ArgumentException("外部提供的缓存空间不足，无法完成编码。", nameof(encodingBuffer));
+		}
+
+		var encodedLength = Encode(buffer[..stream.Read(buffer)], encodingBuffer);
+		output.Write(encodingBuffer[..encodedLength]); // 将缓冲区中指定长度的数据写入输出流
+		output.Flush();
+		return encodedLength;
+	}
+
+	/// <summary>
+	/// 强制使用长流模式（分段编码）解码 Base16384 UTF-16 BE 编码数据流中的数据至二进制数据，追加到输出数据流。<br/>
+	/// 特别提醒：若使用外部提供的缓存空间，必须保证其长度足够大，否则将会引发异常。
+	/// </summary>
+	/// <param name="stream">Base16384 UTF-16 BE 编码数据流</param>
+	/// <param name="output">输出数据流</param>
+	/// <param name="buffer">外部提供的缓存空间（长度必须大于等于 <see cref="Buffer1Length"/> + 2）</param>
+	/// <param name="decodingBuffer">外部提供的用于编码的缓存空间（长度必须大于等于 <see cref="DecodeLength"/>(<see cref="Buffer1Length"/>)）</param>
+	/// <exception cref="ArgumentException">外部提供的缓存空间不足</exception>
+	/// <returns>已写入的数据长度</returns>
+	public static unsafe long DecodeFromLongStreamToStream(Stream stream, Stream output, Span<byte> buffer, Span<byte> decodingBuffer) {
+		if (buffer.Length < Buffer1Length + 2) {
+			throw new ArgumentException("外部提供的缓存空间不足，无法完成解码。", nameof(buffer));
+		}
+		var decodeLength = (int)DecodeLength(Buffer1Length);
+		if (decodingBuffer.Length < decodeLength) {
+			throw new ArgumentException("外部提供的缓存空间不足，无法完成解码。", nameof(decodingBuffer));
+		}
+
+		var readingBuffer = buffer[..Buffer1Length]; // 防止一次读入过多数据，此处使用切片
+		byte end; // skipcq: CS-W1022 对 end 赋值的确是不必要的
+		int readCount = stream.Read(readingBuffer),
+			writeCount = 0;
+		do {
+			if (Convert.ToBoolean(end = IsNextEnd(stream))) {
+				buffer[readCount++] = 61; // (byte)'=' // skipcq: CS-W1082 readCount 值已递增，61 不会被后续语句覆盖
+				buffer[readCount++] = end;
+			}
+			var decodedLength = Decode(buffer[..readCount], decodingBuffer); // 解码结果写入缓冲区
+			output.Write(decodingBuffer[..decodedLength]); // 将缓冲区中指定长度的数据写入输出流
+			writeCount += decodedLength;
+		} while ((readCount = stream.Read(readingBuffer)) > 0);
+		output.Flush();
+
+		return writeCount;
 	}
 
 	/// <summary>
@@ -64,47 +114,23 @@ public static partial class Base16384 {
 	/// <exception cref="ArgumentException">外部提供的缓存空间不足</exception>
 	/// <returns>已写入的数据长度</returns>
 	public static unsafe long DecodeToStream(Stream stream, Stream output, Span<byte> buffer, Span<byte> decodingBuffer) {
-		if (stream.Length > Buffer1Length) {
-			if (buffer.Length < Buffer1Length + 2) {
-				throw new ArgumentException("外部提供的缓存空间不足，无法完成解码。", nameof(buffer));
-			}
-			var decodeLength = (int)DecodeLength(Buffer1Length);
-			if (decodingBuffer.Length < decodeLength) {
-				throw new ArgumentException("外部提供的缓存空间不足，无法完成解码。", nameof(decodingBuffer));
-			}
-
-			var readingBuffer = buffer[..Buffer1Length]; // 防止一次读入过多数据，此处使用切片
-			byte end; // skipcq: CS-W1022 对 end 赋值的确是不必要的
-			int readCount = stream.Read(readingBuffer),
-				writeCount = 0;
-			do {
-				if (Convert.ToBoolean(end = IsNextEnd(stream))) {
-					buffer[readCount++] = 61; // (byte)'=' // skipcq: CS-W1082 readCount 值已递增，61 不会被后续语句覆盖
-					buffer[readCount++] = end;
-				}
-				var decodedLength = Decode(buffer[..readCount], decodingBuffer); // 解码结果写入缓冲区
-				output.Write(decodingBuffer[..decodedLength]); // 将缓冲区中指定长度的数据写入输出流
-				writeCount += decodedLength;
-			} while ((readCount = stream.Read(readingBuffer)) > 0);
-			output.Flush();
-
-			return writeCount;
+		if (!stream.CanSeek || stream.Length > Buffer1Length) {
+			return DecodeFromLongStreamToStream(stream, output, buffer, decodingBuffer);
 		}
-		{
-			var remainingLength = stream.Length - stream.Position;
-			if (buffer.Length < remainingLength) {
-				throw new ArgumentException("外部提供的缓存空间不足，无法完成解码。", nameof(buffer));
-			}
-			var decodeLength = (int)DecodeLength(remainingLength);
-			if (decodingBuffer.Length < decodeLength) {
-				throw new ArgumentException("外部提供的缓存空间不足，无法完成解码。", nameof(decodingBuffer));
-			}
 
-			var decodedLength = Decode(buffer[..stream.Read(buffer)], decodingBuffer);
-			output.Write(decodingBuffer[..decodedLength]);
-			output.Flush();
-			return decodedLength;
+		var remainingLength = stream.Length - stream.Position;
+		if (buffer.Length < remainingLength) {
+			throw new ArgumentException("外部提供的缓存空间不足，无法完成解码。", nameof(buffer));
 		}
+		var decodeLength = (int)DecodeLength(remainingLength);
+		if (decodingBuffer.Length < decodeLength) {
+			throw new ArgumentException("外部提供的缓存空间不足，无法完成解码。", nameof(decodingBuffer));
+		}
+
+		var decodedLength = Decode(buffer[..stream.Read(buffer)], decodingBuffer);
+		output.Write(decodingBuffer[..decodedLength]);
+		output.Flush();
+		return decodedLength;
 	}
 
 
@@ -214,6 +240,21 @@ public static partial class Base16384 {
 
 
 	/// <summary>
+	/// 强制使用长流模式（分段编码）编码二进制数据流中的数据到新的 Base16384 UTF-16 BE 编码数据流。<br/>
+	/// 特别提醒：必须保证外部提供的缓存空间长度足够大，否则将会引发异常。
+	/// </summary>
+	/// <param name="stream">二进制数据流</param>
+	/// <param name="buffer">外部提供的缓存空间（长度必须大于等于 <see cref="Buffer0Length"/>）</param>
+	/// <param name="encodingBuffer">外部提供的用于编码的缓存空间（长度必须大于等于 <see cref="EncodeLength"/>(<see cref="Buffer0Length"/>)）</param>
+	/// <exception cref="ArgumentException">外部提供的缓存空间不足</exception>
+	/// <returns>Base16384 UTF-16 BE 编码数据流</returns>
+	public static MemoryStream EncodeFromLongStreamToNewMemoryStream(Stream stream, Span<byte> buffer, Span<byte> encodingBuffer) {
+		var output = new MemoryStream();
+		_ = EncodeFromLongStreamToStream(stream, output, buffer, encodingBuffer);
+		return output;
+	}
+
+	/// <summary>
 	/// 编码二进制数据流中的数据到新的 Base16384 UTF-16 BE 编码数据流。<br/>
 	/// 特别提醒：必须保证外部提供的缓存空间长度足够大，否则将会引发异常。
 	/// </summary>
@@ -225,6 +266,21 @@ public static partial class Base16384 {
 	public static MemoryStream EncodeToNewMemoryStream(Stream stream, Span<byte> buffer, Span<byte> encodingBuffer) {
 		var output = new MemoryStream();
 		_ = EncodeToStream(stream, output, buffer, encodingBuffer);
+		return output;
+	}
+
+	/// <summary>
+	/// 强制使用长流模式（分段编码）解码 Base16384 UTF-16 BE 编码数据流中的数据到新的二进制数据流。<br/>
+	/// 特别提醒：若使用外部提供的缓存空间，必须保证其长度足够大，否则将会引发异常。
+	/// </summary>
+	/// <param name="stream">Base16384 UTF-16 BE 编码数据流</param>
+	/// <param name="buffer">外部提供的缓存空间（长度必须大于等于 <see cref="Buffer1Length"/> + 2）</param>
+	/// <param name="decodingBuffer">外部提供的用于编码的缓存空间（长度必须大于等于 <see cref="DecodeLength"/>(<see cref="Buffer1Length"/>)）</param>
+	/// <exception cref="ArgumentException">外部提供的缓存空间不足</exception>
+	/// <returns>二进制数据流</returns>
+	public static MemoryStream DecodeFromLongStreamToNewMemorySteam(Stream stream, Span<byte> buffer, Span<byte> decodingBuffer) {
+		var output = new MemoryStream();
+		_ = DecodeFromLongStreamToStream(stream, output, buffer, decodingBuffer);
 		return output;
 	}
 

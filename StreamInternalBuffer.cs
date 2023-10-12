@@ -5,13 +5,33 @@
 /// </summary>
 public static partial class Base16384 {
 	/// <summary>
+	/// 强制使用长流模式（分段编码）编码二进制数据流中的数据至 Base16384 UTF-16 BE 编码数据，追加到输出数据流。
+	/// </summary>
+	/// <param name="stream">二进制数据流</param>
+	/// <param name="output">输出数据流</param>
+	/// <returns>已写入的数据长度</returns>
+	public static long EncodeFromLongStreamToStream(Stream stream, Stream output) =>
+		EncodeFromLongStreamToStream(stream, output, new byte[Buffer0Length], new byte[EncodeLength(Buffer0Length)]);
+
+	/// <summary>
 	/// 编码二进制数据流中的数据至 Base16384 UTF-16 BE 编码数据，追加到输出数据流。
 	/// </summary>
 	/// <param name="stream">二进制数据流</param>
 	/// <param name="output">输出数据流</param>
 	/// <returns>已写入的数据长度</returns>
 	public static long EncodeToStream(Stream stream, Stream output) =>
-		EncodeToStream(stream, output, new byte[stream.Length > Buffer0Length ? Buffer0Length : stream.Length - stream.Position], new byte[EncodeLength(stream.Length > Buffer0Length ? Buffer0Length : stream.Length - stream.Position)]);
+		!stream.CanSeek || stream.Length > Buffer0Length
+			? EncodeFromLongStreamToStream(stream, output)
+			: EncodeToStream(stream, output, new byte[stream.Length - stream.Position], new byte[EncodeLength(stream.Length - stream.Position)]);
+
+	/// <summary>
+	/// 强制使用长流模式（分段编码）解码 Base16384 UTF-16 BE 编码数据流中的数据至二进制数据，追加到输出数据流。
+	/// </summary>
+	/// <param name="stream">Base16384 UTF-16 BE 编码数据流</param>
+	/// <param name="output">输出数据流</param>
+	/// <returns>已写入的数据长度</returns>
+	public static long DecodeFromLongStreamToStream(Stream stream, Stream output) =>
+		DecodeFromLongStreamToStream(stream, output, new byte[Buffer1Length + 2], new byte[DecodeLength(Buffer1Length)]);
 
 	/// <summary>
 	/// 解码 Base16384 UTF-16 BE 编码数据流中的数据至二进制数据，追加到输出数据流。
@@ -20,7 +40,9 @@ public static partial class Base16384 {
 	/// <param name="output">输出数据流</param>
 	/// <returns>已写入的数据长度</returns>
 	public static long DecodeToStream(Stream stream, Stream output) =>
-		DecodeToStream(stream, output, new byte[stream.Length > Buffer1Length ? Buffer1Length + 2 : stream.Length - stream.Position], new byte[DecodeLength(stream.Length > Buffer1Length ? Buffer1Length : stream.Length - stream.Position)]);
+		!stream.CanSeek || stream.Length > Buffer1Length
+			? DecodeFromLongStreamToStream(stream, output)
+			: DecodeToStream(stream, output, new byte[stream.Length - stream.Position], new byte[DecodeLength(stream.Length - stream.Position)]);
 
 
 	/// <summary>
@@ -43,6 +65,17 @@ public static partial class Base16384 {
 
 
 	/// <summary>
+	/// 强制使用长流模式（分段编码）编码二进制数据流中的数据到新的 Base16384 UTF-16 BE 编码数据流。
+	/// </summary>
+	/// <param name="stream">二进制数据流</param>
+	/// <returns>Base16384 UTF-16 BE 编码数据流</returns>
+	public static MemoryStream EncodeFromLongStreamToNewMemoryStream(Stream stream) {
+		var output = new MemoryStream();
+		_ = EncodeFromLongStreamToStream(stream, output);
+		return output;
+	}
+
+	/// <summary>
 	/// 编码二进制数据流中的数据到新的 Base16384 UTF-16 BE 编码数据流。
 	/// </summary>
 	/// <param name="stream">二进制数据流</param>
@@ -50,6 +83,17 @@ public static partial class Base16384 {
 	public static MemoryStream EncodeToNewMemoryStream(Stream stream) {
 		var output = new MemoryStream();
 		_ = EncodeToStream(stream, output);
+		return output;
+	}
+
+	/// <summary>
+	/// 强制使用长流模式（分段编码）解码 Base16384 UTF-16 BE 编码数据流中的数据到新的二进制数据流。
+	/// </summary>
+	/// <param name="stream">Base16384 UTF-16 BE 编码数据流</param>
+	/// <returns>二进制数据流</returns>
+	public static MemoryStream DecodeFromLongStreamToNewMemorySteam(Stream stream) {
+		var output = new MemoryStream();
+		_ = DecodeFromLongStreamToStream(stream, output);
 		return output;
 	}
 

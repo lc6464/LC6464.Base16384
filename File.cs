@@ -5,6 +5,22 @@
 /// </summary>
 public static partial class Base16384 {
 	/// <summary>
+	/// 强制使用长流模式（分段编码）编码二进制数据流中的数据到 Base16384 UTF-16 BE 编码文件。<br/>
+	/// 特别提醒：必须保证外部提供的缓存空间长度足够大，否则将会引发异常。
+	/// </summary>
+	/// <param name="stream">二进制数据流</param>
+	/// <param name="fileInfo">创建的 Base16384 UTF-16 BE 编码文件信息</param>
+	/// <param name="buffer">外部提供的缓存空间（长度必须大于等于 <see cref="Buffer0Length"/>）</param>
+	/// <param name="encodingBuffer">外部提供的用于编码的缓存空间（长度必须大于等于 <see cref="EncodeLength"/>(<see cref="Buffer0Length"/>)）</param>
+	/// <exception cref="ArgumentException">外部提供的缓存空间不足</exception>
+	/// <returns>已写入的数据长度</returns>
+	public static long EncodeFromLongStreamToNewFile(Stream stream, FileInfo fileInfo, Span<byte> buffer, Span<byte> encodingBuffer) {
+		using var file = fileInfo.Create();
+		file.Write(Utf16BEPreamble);
+		return EncodeFromLongStreamToStream(stream, file, buffer, encodingBuffer);
+	}
+
+	/// <summary>
 	/// 编码二进制数据流中的数据到 Base16384 UTF-16 BE 编码文件。<br/>
 	/// 特别提醒：必须保证外部提供的缓存空间长度足够大，否则将会引发异常。
 	/// </summary>
@@ -18,6 +34,21 @@ public static partial class Base16384 {
 		using var file = fileInfo.Create();
 		file.Write(Utf16BEPreamble);
 		return EncodeToStream(stream, file, buffer, encodingBuffer);
+	}
+
+	/// <summary>
+	/// 强制使用长流模式（分段编码）解码 Base16384 UTF-16 BE 编码数据流中的数据到二进制文件。<br/>
+	/// 特别提醒：必须保证外部提供的缓存空间长度足够大，否则将会引发异常。
+	/// </summary>
+	/// <param name="stream">Base16384 UTF-16 BE 编码数据流</param>
+	/// <param name="fileInfo">创建的二进制文件信息</param>
+	/// <param name="buffer">外部提供的缓存空间（长度必须大于等于 <see cref="Buffer1Length"/> + 2）</param>
+	/// <param name="decodingBuffer">外部提供的用于编码的缓存空间（长度必须大于等于 <see cref="DecodeLength"/>(<see cref="Buffer1Length"/>)）</param>
+	/// <exception cref="ArgumentException">外部提供的缓存空间不足</exception>
+	/// <returns>已写入的数据长度</returns>
+	public static long DecodeFromLongStreamToNewFile(Stream stream, FileInfo fileInfo, Span<byte> buffer, Span<byte> decodingBuffer) {
+		using var file = fileInfo.Create();
+		return DecodeFromLongStreamToStream(stream, file, buffer, decodingBuffer);
 	}
 
 	/// <summary>

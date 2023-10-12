@@ -5,13 +5,33 @@
 /// </summary>
 public static partial class Base16384 {
 	/// <summary>
+	/// 强制使用长流模式（分段编码）编码二进制数据流中的数据到 Base16384 UTF-16 BE 编码文件。
+	/// </summary>
+	/// <param name="stream">二进制数据流</param>
+	/// <param name="fileInfo">创建的 Base16384 UTF-16 BE 编码文件信息</param>
+	/// <returns>已写入的数据长度</returns>
+	public static long EncodeFromLongStreamToNewFile(Stream stream, FileInfo fileInfo) =>
+		EncodeFromLongStreamToNewFile(stream, fileInfo, new byte[Buffer0Length], new byte[EncodeLength(Buffer0Length)]);
+
+	/// <summary>
 	/// 编码二进制数据流中的数据到 Base16384 UTF-16 BE 编码文件。
 	/// </summary>
 	/// <param name="stream">二进制数据流</param>
 	/// <param name="fileInfo">创建的 Base16384 UTF-16 BE 编码文件信息</param>
 	/// <returns>已写入的数据长度</returns>
 	public static long EncodeToNewFile(Stream stream, FileInfo fileInfo) =>
-		EncodeToNewFile(stream, fileInfo, new byte[stream.Length > Buffer0Length ? Buffer0Length : stream.Length - stream.Position], new byte[EncodeLength(stream.Length > Buffer0Length ? Buffer0Length : stream.Length - stream.Position)]);
+		!stream.CanSeek || stream.Length > Buffer0Length
+			? EncodeFromLongStreamToNewFile(stream, fileInfo)
+			: EncodeToNewFile(stream, fileInfo, new byte[stream.Length - stream.Position], new byte[EncodeLength(stream.Length - stream.Position)]);
+
+	/// <summary>
+	/// 强制使用长流模式（分段编码）解码 Base16384 UTF-16 BE 编码数据流中的数据到二进制文件。
+	/// </summary>
+	/// <param name="stream">Base16384 UTF-16 BE 编码数据流</param>
+	/// <param name="fileInfo">创建的二进制文件信息</param>
+	/// <returns>已写入的数据长度</returns>
+	public static long DecodeFromLongStreamToNewFile(Stream stream, FileInfo fileInfo) =>
+		DecodeFromLongStreamToNewFile(stream, fileInfo, new byte[Buffer1Length + 2], new byte[DecodeLength(Buffer1Length)]);
 
 	/// <summary>
 	/// 解码 Base16384 UTF-16 BE 编码数据流中的数据到二进制文件。
@@ -20,7 +40,9 @@ public static partial class Base16384 {
 	/// <param name="fileInfo">创建的二进制文件信息</param>
 	/// <returns>已写入的数据长度</returns>
 	public static long DecodeToNewFile(Stream stream, FileInfo fileInfo) =>
-		DecodeToNewFile(stream, fileInfo, new byte[stream.Length > Buffer1Length ? Buffer1Length + 2 : stream.Length - stream.Position], new byte[DecodeLength(stream.Length > Buffer1Length ? Buffer1Length : stream.Length - stream.Position)]);
+		!stream.CanSeek || stream.Length > Buffer1Length
+			? DecodeFromLongStreamToNewFile(stream, fileInfo)
+			: DecodeToNewFile(stream, fileInfo, new byte[stream.Length - stream.Position], new byte[DecodeLength(stream.Length - stream.Position)]);
 
 
 	/// <summary>

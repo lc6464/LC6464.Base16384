@@ -17,8 +17,8 @@
 		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<Authors>LC</Authors>
-		<Version>2.0.0</Version>
-		<PackageReleaseNotes>修复 ConvertFromUtf16BEBytesToUtf8BOMBytes 无法正常使用的问题。</PackageReleaseNotes>
+		<Version>2.1.0-Preview.1</Version>
+		<PackageReleaseNotes>添加强制使用长流模式的方法，并修复不可 Seek 的流无法正常编解码的问题。</PackageReleaseNotes>
 	</PropertyGroup>
 	<ItemGroup>
 		<Using Include="System.Runtime.InteropServices" />
