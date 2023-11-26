@@ -37,8 +37,8 @@ public static partial class Base16384 {
 		Span<byte> buffer = new byte[data.Length];
 		var count = data.Length / 2;
 		for (var i = 0; i < count; i++) {
-			buffer[i * 2] = data[i * 2 + 1];
-			buffer[i * 2 + 1] = data[i * 2];
+			buffer[i * 2] = data[(i * 2) + 1];
+			buffer[(i * 2) + 1] = data[i * 2];
 		}
 		return buffer;
 	}
@@ -52,7 +52,7 @@ public static partial class Base16384 {
 		var count = data.Length / 2;
 		Span<char> buffer = new char[count];
 		for (var i = 0; i < count; i++) {
-			buffer[i] = (char)(data[i * 2] << 8 | data[i * 2 + 1]);
+			buffer[i] = (char)((data[i * 2] << 8) | data[(i * 2) + 1]);
 		}
 		return buffer;
 	}
