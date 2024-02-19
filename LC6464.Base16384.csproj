@@ -8,11 +8,11 @@
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<Description>Base16384 编解码器的 .NET 实现。</Description>
-		<Copyright>Copyright © 2023 LC. All rights reserved.</Copyright>
+		<Description>Base16384 编解码器的 .NET 跨平台实现。</Description>
+		<Copyright>Copyright © 2024 LC. All rights reserved.</Copyright>
 		<PackageProjectUrl>https://github.com/lc6464/LC6464.Base16384</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/lc6464/LC6464.Base16384</RepositoryUrl>
-		<PackageTags>Base16384;Base64;utf16;utf16be;binary;unsafe-pointer</PackageTags>
+		<PackageTags>Base16384;Base64;utf16;utf16be;binary;chinese-character</PackageTags>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>

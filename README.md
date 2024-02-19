@@ -3,7 +3,7 @@
 [NuGet 包](https://www.nuget.org/packages/LC6464.Base16384 "NuGet.Org")
 [GitHub 项目](https://github.com/lc6464/LC6464.Base16384 "GitHub.Com")
 
-Base16384 编解码器的 .NET 实现。
+Base16384 编解码器的 .NET 跨平台实现。
 参考：[fumiama/base16384](https://github.com/fumiama/base16384 "GitHub: fumiama/base16384")
 使用：[lc6464/Base16384.Net](https://github.com/lc6464/Base16384.Net "GitHub: lc6464/Base16384.Net")
 
@@ -13,7 +13,7 @@ Base16384 编解码器的 .NET 实现。
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<!-- 一些东西 -->
